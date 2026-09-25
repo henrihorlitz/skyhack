@@ -2,17 +2,28 @@
 
 # SKYHACK 2026 — hackathon project
 
-One-day hackathon, Lisbon, Sep 26 2026. **Code freeze 19:00, demos 20:00.**
-Tracks: **Healthcare** and **AI Agents**. Sponsors: ElevenLabs (voice), Cursor.
-Judges score the live demo, not the code. English UI and pitch.
+One-day hackathon, Lisbon, Sep 26 2026. Judges score the live demo, not the code. English UI and pitch.
+Tracks: **Healthcare** and **AI Agents**. Partners on the website: Cursor, Supabase, BuildUp Labs, Lisbon AI Week
+(ElevenLabs is not listed on the site; check at kickoff whether there is a voice prize).
 
-## The idea (fill in at kickoff)
+**Schedule (from xthon.eu):** 08:30 hacking starts · **17:15 code freeze** · 17:30 technical reviewers visit tables · 18:45 finalist pitches · 20:00 awards.
+Team max. 3 people.
 
-- **One sentence:** For [who], who [problem], [product] [does what].
-- **Track:** Healthcare / AI Agents / both
-- **Demo path:** User [does A] → sees [B] → aha moment: [C]
-- **Real:** [the core feature]
-- **Faked:** login, payments, emails, external systems, anything not on the demo path
+## The idea: MindPeace (working title)
+
+- **One sentence:** For families of hospitalized patients in Portugal, who can only reach a doctor between 12:00 and 13:00 (and nurses aren't allowed to share details), MindPeace turns the doctor's daily chart note into a doctor-approved, plain-language update and a voice agent that answers family questions 24/7, using only approved information.
+- **Track:** both. Healthcare (caregivers get information, doctors save time) + AI Agents (the voice agent uses tools).
+- **Origin story:** Henri's girlfriend is a nurse in Lisbon. Families call all day, nurses can't answer, doctors have no time.
+- **Demo path:**
+  1. **Doctor view:** raw jargon chart note → AI briefing split into ✅ shareable / 🔒 withheld (with reason, e.g. suspected malignancy pending biopsy) / ✏️ doctor should phrase it → **one-click approve**. Aha #1: the AI knows what *not* to say.
+  2. **Family app (mobile):** a notification with the plain-language status ("Stable · CT tomorrow · expected discharge Friday") and a treatment timeline.
+  3. **Live voice call:** family asks "When can I visit?" → it answers. Then asks "Does she have cancer?" → the agent declines, logs the question for the doctor and books a callback slot.
+  4. **Back to the doctor view:** the question shows up in the doctor's queue. **Aha #2: the loop closes, so the doctor gets one list instead of 15 phone calls.**
+- **Agent tools:** `get_approved_update`, `log_question_for_doctor`, `book_callback_slot`. Answers only from approved content, multilingual (PT/EN/DE).
+- **Real:** the note → filtered briefing (Claude), the approval flow, the family status view, the voice agent with tools.
+- **Faked:** EHR integration (seeded chart notes for 2–3 synthetic patients), login/relative verification, push notifications, the callback calendar.
+- **Business (pitch only):** the hospital pays (saves doctor time, fewer calls, better satisfaction for private hospitals like CUF, Luz and Lusíadas), free for families. Pitch integration via FHIR plus patient consent over who gets access.
+- **Roadmap line (don't build):** after discharge, the agent calls the patient daily and escalates warning signs.
 
 ## Rules for Claude
 
@@ -24,7 +35,7 @@ Judges score the live demo, not the code. English UI and pitch.
 6. **Verify before saying done:** run `bun run build` and check the page in the browser.
 7. **Commit + push after every working step** (Vercel auto-deploys from `main`).
 8. Henri is a beginner dev: explain choices in one plain sentence, ask when there's a trade-off.
-9. **After ~17:15: feature freeze.** Only polish, copy, demo data, fallbacks, and bug fixes.
+9. **After ~15:30: feature freeze.** Only polish, copy, demo data, fallbacks, and bug fixes. Code freeze is 17:15.
 
 ## Stack (already set up — don't re-install)
 
