@@ -6,7 +6,8 @@ One-day hackathon, Lisbon, Sep 26 2026. Judges score the live demo, not the code
 Tracks: **Healthcare** and **AI Agents**. Partners on the website: Cursor, Supabase, BuildUp Labs, Lisbon AI Week
 (ElevenLabs is not listed on the site; check at kickoff whether there is a voice prize).
 
-**Schedule (from xthon.eu):** 08:30 hacking starts · **17:15 code freeze** · 17:30 technical reviewers visit tables · 18:45 finalist pitches · 20:00 awards.
+**Schedule (latest agenda):** 08:00 breakfast · 08:30 hacking starts + team formation · 10:00 break · 12:30 lunch · **17:15 code freeze & submission** · 17:30–18:30 technical reviewers at the tables · 18:45 finalists present to the final jury · 20:00 awards.
+Have the submission ready **before 17:00**: live Vercel URL, repo link, a short description, and the demo must run without us touching code.
 Team max. 3 people.
 
 ## The idea: MindPeace (working title)
