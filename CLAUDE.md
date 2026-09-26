@@ -62,7 +62,7 @@ Domain facts from a nurse (note structure, what nurses may say, call volume): `d
 - `bun` as package manager (`bun add`, `bun run dev`)
 - Claude via `@anthropic-ai/sdk`: `src/lib/ai.ts` (single call), `src/app/api/agent/route.ts` (tool-using agent, tools in `src/lib/agent-tools.ts`)
 - ElevenLabs TTS: `src/app/api/tts/route.ts` + `<SpeakButton text=… />`
-- Supabase: `getSupabase()` in `src/lib/supabase.ts` (no auth; fixed `DEMO_USER`). Supabase MCP is connected for this project only — use it to create tables.
+- Supabase: `getSupabase()` in `src/lib/supabase.ts` (no auth; fixed `DEMO_USER`). Use the Supabase MCP/connector to create tables, but **only ever on project `qwuswyylymbwzdrqhjpk` ("Skyhack", London)**. The connector can see Henri's other projects too: never touch those.
 - Health check: `/status` page
 
 ## Key files
