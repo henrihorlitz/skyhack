@@ -67,6 +67,7 @@ Domain facts from a nurse (note structure, what nurses may say, call volume): `d
 9. **After 14:45: feature freeze.** Only polish, copy, demo data, fallbacks, and bug fixes. Code freeze is 17:15. Day plan: `DEMO.md`.
 10. **Build with theme tokens, not hard-coded colors** (Tailwind/shadcn CSS variables in `globals.css`), so Henri's design system can be dropped in later by swapping variables.
 11. **Headless self-testing:** use the existing `browse` / `qa` skills (gstack). Don't install Playwright.
+12. **Keep the docs true.** When you add or change a route, table, agent tool, env var or service, update `docs/architecture.md` (incl. the status column) in the same commit. Technical reviewers read it. Non-obvious choices go in `docs/decisions/`.
 
 ## Stack (already set up — don't re-install)
 
@@ -85,6 +86,9 @@ Domain facts from a nurse (note structure, what nurses may say, call volume): `d
 | `src/data/seed.ts` | Demo user + synthetic data |
 | `src/data/fallbacks.ts` | Cached AI answers for when the API fails |
 | `DEMO.md` | Demo script + pitch notes |
+| `docs/architecture.md` | **Technical setup: diagram, components + status, env vars, deploy, gotchas. Read before structural changes** |
+| `docs/decisions/` | Why we built it this way |
+| `README.md` | Judge-facing page (problem, solution, tech, real vs. simulated). Final update before submission |
 
 ## Deploy & env
 
