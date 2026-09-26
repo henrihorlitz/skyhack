@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, CircleCheck, RefreshCw, Send } from "lucide-react";
+import { ArrowLeft, CircleCheck, FilePlus2, RefreshCw, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DraftEditor } from "@/components/doctor/draft-editor";
 import { DraftLoading } from "@/components/doctor/draft-loading";
 import { QuestionsPanel } from "@/components/doctor/questions-panel";
 import { fetchDraft, isToday, timeLabel, useDemoState } from "@/lib/client";
 import type { FamilyUpdate, Patient } from "@/lib/types";
+import { JUDGE_TRICK_LINE } from "@/data/notes";
 
 type Props = { patient: Patient; initialNote: string };
 
@@ -41,6 +42,12 @@ export function ReviewScreen({ patient, initialNote }: Props) {
       .catch(() => toast.error("Couldn't prepare the draft. Please try again."))
       .finally(() => setLoading(false));
   }, [patient.id, initialNote]);
+
+  function addFinding() {
+    const next = `${note.trimEnd()}\n\nRADIOLOGY (NEW)\n${JUDGE_TRICK_LINE}`;
+    setNote(next);
+    load(next, true);
+  }
 
   const approvedToday = state?.approvals.find((a) => a.patientId === patient.id && isToday(a));
   const family = patient.family.map((f) => f.name.split(" ")[0]).join(" and ");
@@ -83,11 +90,19 @@ export function ReviewScreen({ patient, initialNote }: Props) {
         <section className="flex flex-col">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-section">Today&apos;s chart note</h2>
-            {note !== draftNote && (
-              <Button size="sm" variant="outline" onClick={() => load(note, true)} disabled={loading}>
-                <RefreshCw className={loading ? "animate-spin" : ""} /> Regenerate draft
-              </Button>
-            )}
+            <div className="flex gap-2">
+              {/* Demo helper: a judge adds a serious new finding with one click, and the AI must hold it back. */}
+              {patient.id === "maria" && !note.includes(JUDGE_TRICK_LINE) && (
+                <Button size="sm" variant="outline" onClick={addFinding} disabled={loading}>
+                  <FilePlus2 /> New radiology report
+                </Button>
+              )}
+              {note !== draftNote && (
+                <Button size="sm" variant="outline" onClick={() => load(note, true)} disabled={loading}>
+                  <RefreshCw className={loading ? "animate-spin" : ""} /> Regenerate draft
+                </Button>
+              )}
+            </div>
           </div>
           <textarea
             value={note}
