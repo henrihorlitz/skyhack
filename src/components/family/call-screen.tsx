@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
-import { Leaf, Mic, MicOff, PhoneOff } from "lucide-react";
+import { Mic, MicOff, PhoneOff } from "lucide-react";
 import { EventChips } from "@/components/family/event-chips";
+import { VoiceWave } from "@/components/family/voice-wave";
 import { DEMO_USER } from "@/data/seed";
 import type { Patient } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -92,28 +93,27 @@ function Call({ patient, onClose }: Props) {
   const last = lines.slice(-4);
   const timer = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
 
+  // The wave follows whoever is talking: the agent's voice, or the caller's microphone.
+  const getLevel = () =>
+    !connected ? 0 : conversation.isSpeaking ? conversation.getOutputVolume() : conversation.getInputVolume();
+
   return (
-    <div className="fixed inset-0 z-50 mx-auto flex w-full max-w-md flex-col bg-[linear-gradient(180deg,#1f2937_0%,#111827_100%)] text-white animate-in fade-in slide-in-from-bottom-6">
-      <div className="flex flex-col items-center pt-16">
-        <span
-          className={cn(
-            "grid size-24 place-items-center rounded-full bg-primary text-primary-foreground transition-all duration-300",
-            conversation.isSpeaking && "scale-105 ring-[14px] ring-white/10",
-          )}
-        >
-          <Leaf className="size-10" />
-        </span>
-        <p className="mt-5 text-2xl font-semibold">MindPeace</p>
-        <p className="text-sm text-white/60">{patient.firstName}&apos;s care team assistant</p>
-        <p className="mt-2 text-sm tabular-nums text-white/80">
-          {error ? "Call failed" : connected ? timer : "Calling…"}
-        </p>
+    <div className="fixed inset-0 z-50 mx-auto flex w-full max-w-md flex-col bg-background animate-in fade-in slide-in-from-bottom-6">
+      <div className="flex flex-col items-center px-6 pt-14 text-center">
+        <p className="text-sm text-muted-foreground">{error ? "Call failed" : connected ? timer : "Calling…"}</p>
+        <p className="mt-1 text-3xl font-semibold tracking-tight">MindPeace</p>
+        <p className="text-sm text-muted-foreground">{patient.firstName}&apos;s care team assistant</p>
       </div>
 
-      <div className="mt-8 flex flex-1 flex-col justify-end gap-2 overflow-hidden px-6 pb-4">
-        {error && <p className="rounded-xl bg-white/10 p-3 text-sm">{error}. Please use the chat instead.</p>}
+      <VoiceWave getLevel={getLevel} className="mt-6 h-44 w-full" />
+
+      <div className="flex flex-1 flex-col justify-end gap-2 overflow-hidden px-6 pb-4">
+        {error && <p className="rounded-xl bg-muted p-3 text-sm">{error}. Please use the chat instead.</p>}
         {last.map((l, i) => (
-          <p key={lines.length - last.length + i} className={cn("text-[15px] leading-snug animate-in fade-in", l.role === "user" ? "self-end text-right text-white/60" : "text-white")}>
+          <p
+            key={lines.length - last.length + i}
+            className={cn("text-[15px] leading-snug animate-in fade-in", l.role === "user" ? "self-end text-right text-muted-foreground" : "text-foreground")}
+          >
             {l.text}
           </p>
         ))}
@@ -126,11 +126,11 @@ function Call({ patient, onClose }: Props) {
         <button
           onClick={() => conversation.setMuted(!conversation.isMuted)}
           aria-label={conversation.isMuted ? "Unmute" : "Mute"}
-          className={cn("grid size-16 place-items-center rounded-full", conversation.isMuted ? "bg-white text-gray-900" : "bg-white/15")}
+          className={cn("grid size-16 place-items-center rounded-full", conversation.isMuted ? "bg-foreground text-background" : "bg-muted")}
         >
           {conversation.isMuted ? <MicOff className="size-6" /> : <Mic className="size-6" />}
         </button>
-        <button onClick={hangUp} aria-label="End call" className="grid size-16 place-items-center rounded-full bg-red-500">
+        <button onClick={hangUp} aria-label="End call" className="grid size-16 place-items-center rounded-full bg-red-500 text-white">
           <PhoneOff className="size-6" />
         </button>
       </div>
