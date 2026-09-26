@@ -52,12 +52,11 @@ export function CareTeam({ patient, onAsk }: { patient: Patient; onAsk: () => vo
 function Portrait() {
   const [failed, setFailed] = useState(false);
   return (
-    <div className="relative mt-3 size-28 shrink-0">
+    <div className="relative mt-8 size-28 shrink-0">
       <span className="absolute inset-0 rounded-full bg-primary-soft" />
-      <span className="absolute -right-1 bottom-2 size-9 rounded-full bg-primary/15" />
-      <div className="absolute inset-x-0 -top-5 bottom-0 overflow-hidden rounded-b-full">
+      <div className="absolute inset-x-0 -top-10 bottom-0 overflow-hidden rounded-b-full">
         {failed ? (
-          <span className="grid size-full place-items-center pt-5 text-2xl font-semibold text-primary-deep">
+          <span className="grid size-full place-items-center pt-10 text-2xl font-semibold text-primary-deep">
             {DEMO_USER.avatar}
           </span>
         ) : (
