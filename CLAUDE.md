@@ -76,6 +76,7 @@ Domain facts from a nurse (note structure, what nurses may say, call volume): `d
 
 ## Deploy & env
 
+- **Live URL (public):** https://mindpeace-health.vercel.app (health check: `/status`). Vercel project `henri-horlitz/skyhack`.
 - Secrets live only in `.env.local` (gitignored) and in Vercel project env vars. Never hardcode keys.
 - Deploy: push to `main` → Vercel builds. Manual: `bunx vercel --prod --token "$VERCEL_TOKEN"`.
 - Repo is **private**. On Vercel Hobby, commits by other people to a private repo don't deploy. If a teammate joins: either only Henri pushes, or make the repo public.
