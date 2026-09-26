@@ -40,3 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 !.env.example
+
+# Pitch material: kept locally, not in the public repo
+DEMO.md
+docs/speaker-notes.md
+docs/pitch-deck.md
+docs/elevator-pitch.md
+docs/*pitch*.pdf
