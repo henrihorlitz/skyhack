@@ -79,7 +79,7 @@ export function ReviewScreen({ patient, initialNote }: Props) {
         )}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_1.15fr]">
+      <div className="grid gap-6 md:grid-cols-[0.9fr_1.1fr]">
         <section className="flex flex-col">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-section">Today&apos;s chart note</h2>
@@ -93,7 +93,7 @@ export function ReviewScreen({ patient, initialNote }: Props) {
             value={note}
             onChange={(e) => setNote(e.target.value)}
             spellCheck={false}
-            className="min-h-[560px] flex-1 resize-none rounded-card bg-card p-6 font-mono text-[12.5px] leading-relaxed text-foreground/85 shadow-soft outline-none focus:ring-2 focus:ring-ring/40"
+            className="min-h-[560px] flex-1 resize-none rounded-card bg-card p-5 font-mono text-[12px] leading-relaxed text-foreground/85 shadow-soft outline-none focus:ring-2 focus:ring-ring/40"
           />
         </section>
 
