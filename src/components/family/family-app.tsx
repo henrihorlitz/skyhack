@@ -49,7 +49,7 @@ export function FamilyApp({ patient, approvals, freshDay }: Props) {
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold", STATUS_STYLE[latest.update.status])}>
                   <span className="size-1.5 rounded-full bg-current" />
-                  {latest.update.statusLabel} · updated {relativeDay(latest.day)}
+                  Updated {relativeDay(latest.day)}
                 </span>
               </div>
               <p className="mt-2 text-[13px] font-medium text-muted-foreground">
