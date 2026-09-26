@@ -4,19 +4,23 @@
 
 ## Timeline for the day
 
-| Time | Phase |
-|---|---|
-| 08:30–09:15 | Team formation, confirm idea, finish this file (script, numbers) |
-| 09:15–10:45 | Rough skeleton: the whole demo path clickable end to end, ugly is fine, **live on Vercel** |
-| 10:45–15:30 | Make the core real: note → filtered briefing, approval, family view, voice agent with tools |
-| **15:30** | **Feature freeze.** Only polish, copy, demo data, fallbacks |
-| 15:30–16:30 | Record real AI answers into `src/data/fallbacks.ts`, polish UI, test on a phone |
-| 16:30–17:00 | Record 60s backup video (Cmd+Shift+5), README, prepare submission |
-| **17:00** | **Submit** (live URL, repo, description). Hard deadline 17:15 |
-| 17:15 | Code freeze. Don't touch code anymore |
-| 17:30–18:30 | Technical reviewers at our table: demo must run anytime, rehearse between visits |
-| 18:45 | Finalists pitch to the final jury |
-| 20:00 | Awards |
+**Workflow:** plan everything first → Claude builds while Henri makes the design system and logo → Claude tests headless → Henri tests → apply the design system → 3h pitch → 1h practice.
+
+| Time | Claude | Henri |
+|---|---|---|
+| 09:50–10:45 | Planning together: UX, user flows, feature list, seed data outline → `docs/plan.md` | same |
+| 10:45–13:00 | **Build** the full demo path (doctor view, family timeline, voice agent, approve → live update), default shadcn style with theme tokens | **Design system + logo**: colors, font, radius, logo SVG. Deliver as tokens so the swap is easy. 12:30 lunch |
+| 13:00–13:30 | **Self-test headless** (gstack `browse`/`qa`): click the whole demo path, fix bugs | lunch / finish design |
+| 13:30–14:00 | Fix bugs from Henri's test | **Test** on laptop + phone, write a bug list |
+| 14:00–14:45 | **Apply the design system** + logo, final fixes, deploy | review the look |
+| **14:45** | **Feature freeze** | |
+| 14:45–17:45 | Only fixes, polish, fallbacks (record real AI answers), README, 60s backup video | **Pitch (3h):** script, slides, numbers, Q&A answers |
+| **17:00** | **Submit** (live URL, repo, description). Hard deadline 17:15 | |
+| 17:15 | **Code freeze.** Don't touch code anymore | |
+| 17:30–18:30 | Technical reviewers at our table: every visit = a live demo rehearsal | |
+| 17:45–18:45 | | **Practice (1h):** full pitch + demo, 3–5 runs, timed |
+| 18:45 | Finalists pitch to the final jury | |
+| 20:00 | Awards | |
 
 ## One sentence
 

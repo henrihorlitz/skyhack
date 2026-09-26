@@ -2,7 +2,8 @@
 
 # SKYHACK 2026 — hackathon project
 
-One-day hackathon, Lisbon, Sep 26 2026. Judges score the live demo, not the code. English UI and pitch.
+One-day hackathon, Lisbon, Sep 26 2026. Judges score the live demo, not the code.
+**Everything we produce is in English:** UI, seed chart notes, AI output, voice agent, pitch, README. Only the patient/doctor names are Portuguese.
 Tracks: **Healthcare** and **AI Agents**. Partners on the website: Cursor, Supabase, BuildUp Labs, Lisbon AI Week
 (ElevenLabs is not listed on the site; check at kickoff whether there is a voice prize).
 
@@ -36,7 +37,16 @@ Domain facts from a nurse (note structure, what nurses may say, call volume): `d
   - ⚫ **Internal, never shared:** instructions to the nursing team (draw blood, IV fluids, meds).
   - Pitch line: *"We didn't invent the rules. We encoded the rules nurses already follow."*
 - **Seed chart notes** follow the real structure: Problems (active/resolved) → Findings (labs, exams) → Plan for tomorrow (incl. nursing instructions).
-  The family view mirrors it in three sections: *Why she's here* / *How today went* / *What's next*.
+- **Family view = a timeline** (UX idea, finalize in planning):
+  1. Top: patient name + today's status pill ("🟢 Stable · updated today 14:32 · approved by Dr. Silva"), so the answer comes in 5 seconds.
+  2. *Why she's here* (plain language).
+  3. Vertical timeline: past days compact → **today highlighted** → upcoming (e.g. "Tomorrow: chest CT") → at the end 🏠 **expected discharge**.
+  - Demo moment: the doctor clicks Approve → a new node appears live in the family timeline.
+  - The main demo patient needs 3–4 days of notes; the other patients 1 each.
+- **Expected discharge date** (probably the #1 family question):
+  - Medical scope (🟡), shown only after doctor approval.
+  - The AI **never invents or estimates a date**. If the note has none, show "Not estimated yet. Dr. Silva will update you."
+  - Always labelled as an estimate ("Expected: around Friday"). If it moves, show a one-line plain-language reason.
 - **Impact numbers (real, from the nurse's Lisbon ward, representative of Portugal):** 22 beds, ~3 doctors, 1 phone hour (12:00–13:00). Details in `DEMO.md`.
 - **Agent tools:** `get_approved_update`, `log_question_for_doctor`, `book_callback_slot`. Answers only from approved content, multilingual (PT/EN/DE).
 - **Real:** the note → filtered briefing (Claude), the approval flow, the family status view, the voice agent with tools.
@@ -54,7 +64,9 @@ Domain facts from a nurse (note structure, what nurses may say, call volume): `d
 6. **Verify before saying done:** run `bun run build` and check the page in the browser.
 7. **Commit + push after every working step** (Vercel auto-deploys from `main`).
 8. Henri is a beginner dev: explain choices in one plain sentence, ask when there's a trade-off.
-9. **After ~15:30: feature freeze.** Only polish, copy, demo data, fallbacks, and bug fixes. Code freeze is 17:15.
+9. **After 14:45: feature freeze.** Only polish, copy, demo data, fallbacks, and bug fixes. Code freeze is 17:15. Day plan: `DEMO.md`.
+10. **Build with theme tokens, not hard-coded colors** (Tailwind/shadcn CSS variables in `globals.css`), so Henri's design system can be dropped in later by swapping variables.
+11. **Headless self-testing:** use the existing `browse` / `qa` skills (gstack). Don't install Playwright.
 
 ## Stack (already set up — don't re-install)
 
