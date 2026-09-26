@@ -91,9 +91,10 @@ function Node({
 }) {
   return (
     <li id={id} className={cn("relative flex gap-3 pb-5", className)}>
+      {/* The line runs from this dot's center into the next item, so the dots read as one connected path. */}
+      {!last && <span className="absolute top-2.5 -bottom-2.5 left-[13.5px] w-px bg-border" />}
       <div className="relative flex w-7 shrink-0 justify-center pt-1">
-        {!last && <span className="absolute top-4 bottom-[-4px] w-px bg-border" />}
-        <span className="relative">{dot}</span>
+        <span className="relative z-10">{dot}</span>
       </div>
       <div className="min-w-0 flex-1">{children}</div>
     </li>
