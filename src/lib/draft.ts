@@ -33,21 +33,40 @@ Return ONLY a JSON object, no markdown fences:
   "statusLabel": "1-2 words, e.g. Improving",
   "headline": "max 5 words for today's timeline entry",
   "whyHere": "1-2 sentences: why the patient is in hospital, only already-known diagnoses",
-  "items": [
-    { "id": "i1", "section": "today", "scope": "nursing" | "medical", "text": "...", "when": null },
-    { "id": "i4", "section": "next", "scope": "medical", "text": "...", "when": "Sun 27 Sep" }
-  ],
+  "today": [ { "scope": "nursing" | "medical", "text": "..." } ],
+  "next": [ { "scope": "medical", "text": "...", "when": "Sun 27 Sep" } ],
   "discharge": "string or null",
   "withheld": [ { "text": "short description", "reason": "why it is not shared", "kind": "withheld" | "internal" } ]
 }
-Use 2-4 "today" items and 1-3 "next" items. "when" is a short day label like "Mon 28 Sep" for dated next steps, otherwise null.`;
+"today": 2-4 items. "next": REQUIRED, 1-3 items, one per planned exam, procedure or treatment change in the PLAN.
+"when" is a short day label like "Mon 28 Sep" for dated next steps, otherwise null.`;
+
+type Section = "today" | "next";
+type RawItem = { scope?: string; text?: string; when?: string | null };
+
+// The AI returns separate "today"/"next" lists (a required list of its own is dropped far less
+// often than one section of a mixed list). Cached drafts use the app's "items" shape. Accept both.
+function normalize(raw: Record<string, unknown>) {
+  if (Array.isArray(raw.items)) return raw;
+  const toItems = (section: Section, list: unknown) =>
+    (Array.isArray(list) ? (list as RawItem[]) : []).map((i, n) => ({
+      id: `${section}-${n + 1}`,
+      section,
+      scope: i.scope === "nursing" ? "nursing" : "medical",
+      text: i.text ?? "",
+      when: i.when ?? null,
+      include: true,
+    }));
+  const { today, next, ...rest } = raw;
+  return { ...rest, items: [...toItems("today", today), ...toItems("next", next)] };
+}
 
 function parseUpdate(text: string): FamilyUpdate | null {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
   if (start < 0 || end <= start) return null;
   try {
-    const parsed = familyUpdateSchema.safeParse(JSON.parse(text.slice(start, end + 1)));
+    const parsed = familyUpdateSchema.safeParse(normalize(JSON.parse(text.slice(start, end + 1))));
     if (!parsed.success) console.warn("[draft] invalid shape:", parsed.error.issues.slice(0, 3));
     return parsed.success ? parsed.data : null;
   } catch (err) {
@@ -55,6 +74,8 @@ function parseUpdate(text: string): FamilyUpdate | null {
     return null;
   }
 }
+
+const hasNext = (u: FamilyUpdate) => u.items.some((i) => i.section === "next" && i.text.trim());
 
 export async function generateDraft(note: string, patient: Patient) {
   const prompt = `Patient: ${patient.name}, ${patient.age}, refer to ${patient.pronoun === "she" ? "her" : "him"} as ${patient.firstName}.
@@ -64,16 +85,23 @@ ${note}`;
   let result = await askClaude(prompt, SYSTEM);
   let live = parseUpdate(result.text);
   // The model sometimes drops the plan when a finding is withheld. Ask once more, explicitly.
-  if (live && result.source === "live" && !live.items.some((i) => i.section === "next")) {
+  if (live && result.source === "live" && !hasNext(live)) {
+    console.warn("[draft] no next steps, retrying once");
     result = await askClaude(
       `${prompt}\n\nIMPORTANT: your previous draft had no "next" items. Include every planned exam and treatment change from the PLAN as a neutral "next" item.`,
       SYSTEM,
     );
-    live = parseUpdate(result.text) ?? live;
+    const retry = parseUpdate(result.text);
+    if (retry && hasNext(retry)) live = retry;
+  }
+  // Last safety net: never show an empty "What's next". Borrow the prepared next steps for this patient.
+  const cached = parseUpdate(findFallback(prompt));
+  if (live && !hasNext(live) && cached) {
+    console.warn("[draft] still no next steps, using prepared ones");
+    live = { ...live, items: [...live.items, ...cached.items.filter((i) => i.section === "next")] };
   }
   if (live) return { update: live, source: result.source };
   // Live answer was unusable: serve the cached draft for this note instead.
-  const cached = parseUpdate(findFallback(prompt));
   if (!cached) throw new Error("No usable draft (live or fallback)");
   return { update: cached, source: "fallback" as const };
 }
