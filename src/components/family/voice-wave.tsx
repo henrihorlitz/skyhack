@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-// A silk-like ribbon that moves with the voice on the call screen (inspired by design Inspo/).
+// A silk-like ribbon that moves with the voice on the call screen (soft, silk-like, teal only).
 // Many thin strands with slightly shifted phases twist against each other, which reads as one
 // ribbon with depth. getLevel() returns the audio volume 0..1; the ribbon swells when someone speaks.
 // Teal shades from DESIGN.md.
