@@ -41,6 +41,8 @@ For **families of hospitalized patients in Portugal**, who **can only reach a do
 
 ## 5-minute pitch (including live demo)
 
+**Final deck structure, slide content and timing: `docs/pitch-deck.md`** (supersedes the draft table below).
+
 **Setup:** two Chrome windows side by side. Left: doctor view (`/doctor`). Right: family phone (`/family/maria`, narrow ~390 px, on the lock screen).
 
 | Time | Part | Say / do |
