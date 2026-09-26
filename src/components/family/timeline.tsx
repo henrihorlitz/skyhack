@@ -112,7 +112,7 @@ function dischargeDay(text: string | null | undefined): string | null {
 }
 
 // DESIGN.md day chips: one per day of the stay, today in teal. The approved expected discharge day
-// gets a dashed, half-filled chip with a home outline: "roughly here", not a promise. Tap a day to jump to it.
+// gets a dashed chip with a home outline: "roughly here", not a promise. Tap a day to jump to it.
 export function DayStrip({ admitted, approvals }: { admitted: string; approvals: Approval[] }) {
   const home = dischargeDay(approvals.at(-1)?.update.discharge);
   const start = Date.parse(`${admitted}T12:00:00Z`);
@@ -142,7 +142,7 @@ export function DayStrip({ admitted, approvals }: { admitted: string; approvals:
             className={cn(
               "flex h-[58px] w-[42px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-chip",
               selected && "bg-primary text-primary-foreground shadow-glow",
-              isHome && "border-2 border-dashed border-primary/60 bg-[linear-gradient(to_top,var(--primary-soft)_50%,var(--card)_50%)] text-primary-deep",
+              isHome && "border-2 border-dashed border-primary/60 bg-card text-primary-deep",
               !selected && !isHome && "bg-day text-muted-foreground",
             )}
           >
