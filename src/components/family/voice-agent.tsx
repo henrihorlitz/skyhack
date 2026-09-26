@@ -25,7 +25,9 @@ export function VoiceAgent({ patient, onClose }: { patient: Patient; onClose: ()
   const bottom = useRef<HTMLDivElement>(null);
   const mic = useSpeechInput((text) => send(text));
 
-  useEffect(() => bottom.current?.scrollIntoView({ behavior: "smooth" }), [turns, busy, mic.interim]);
+  useEffect(() => {
+    bottom.current?.scrollIntoView({ behavior: "smooth" });
+  }, [turns, busy, mic.interim]);
 
   async function say(text: string) {
     setSpeaking(true);
@@ -76,7 +78,10 @@ export function VoiceAgent({ patient, onClose }: { patient: Patient; onClose: ()
             <p className={cn("max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed", t.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted")}>
               {t.content}
             </p>
-            {t.events?.filter((e) => VISIBLE_TOOLS.includes(e.tool)).map((e, n) => (
+            {t.events
+              ?.filter((e) => VISIBLE_TOOLS.includes(e.tool))
+              .sort((a, b) => VISIBLE_TOOLS.indexOf(a.tool) - VISIBLE_TOOLS.indexOf(b.tool))
+              .map((e, n) => (
               <span key={n} className="inline-flex items-center gap-1.5 rounded-full bg-medical-soft px-3 py-1 text-xs font-medium text-medical animate-in fade-in zoom-in-95">
                 {e.tool === "book_callback_slot" ? <CalendarClock className="size-3.5" /> : <ClipboardList className="size-3.5" />}
                 {e.label}
