@@ -6,7 +6,7 @@ type Kind = "nursing" | "medical" | "withheld" | "internal";
 // coral = withheld from the family, gray = care team only.
 const STYLES: Record<Kind, { label: string; className: string }> = {
   nursing: { label: "Safe to share", className: "bg-primary-soft text-primary-deep" },
-  medical: { label: "Needs your approval", className: "bg-card text-primary-deep ring-1 ring-primary/35" },
+  medical: { label: "Needs approval", className: "bg-card text-primary-deep ring-1 ring-primary/35" },
   withheld: { label: "Withheld", className: "bg-coral-soft text-coral-ink" },
   internal: { label: "Care team only", className: "bg-neutral-soft text-neutral-ink" },
 };
