@@ -60,7 +60,7 @@ Rehearse with a timer. If you run long, cut words in "Why it works", never demo 
 
 **If something fails on stage**
 - Call doesn't connect (mic/network) → close it, tap the **chat** button, type the same questions. The loop still closes.
-- Draft is slow → keep talking over the loading steps; after ~25 s the prepared draft appears automatically.
+- Draft is slow → keep talking over the loading steps. If the AI is down, a prepared draft appears automatically once the request times out.
 - Anything stuck → start page → **Reset demo** → start again from the ward overview.
 
 ## Honest answers ready
