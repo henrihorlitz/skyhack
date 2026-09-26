@@ -1,39 +1,73 @@
 import { betaZodTool } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
-import { DEMO_PATIENTS, DEMO_SLOTS } from "@/data/seed";
+import { addQuestion, bookCallback, getApprovals } from "@/lib/store";
+import { DEMO_USER, WARD_INFO, getPatient } from "@/data/seed";
 
-// Example tools for the agent. They read/write DEMO DATA only.
-// TOMORROW: replace these with the 2–4 actions your product's agent needs.
-// Faking the backend is fine — the agent deciding *which* tool to call is the real part.
+// Tools for the family voice agent. They only ever expose APPROVED information.
+// Each tool also records a short "event" so the UI can show what the agent did.
 
-export const lookupPatient = betaZodTool({
-  name: "lookup_patient",
-  description: "Look up a patient's profile (age, conditions, medications) by name.",
-  inputSchema: z.object({ name: z.string().describe("Patient first or full name") }),
-  run: async ({ name }) => {
-    const p = DEMO_PATIENTS.find((x) => x.name.toLowerCase().includes(name.toLowerCase()));
-    return p ? JSON.stringify(p) : `No patient found matching "${name}".`;
-  },
-});
+export type AgentEvent = { tool: string; label: string };
 
-export const findAppointmentSlots = betaZodTool({
-  name: "find_appointment_slots",
-  description: "Find open appointment slots for a medical specialty.",
-  inputSchema: z.object({ specialty: z.string().describe("e.g. cardiology, general practice") }),
-  run: async ({ specialty }) => {
-    const slots = DEMO_SLOTS.filter((s) => s.specialty.includes(specialty.toLowerCase()));
-    return slots.length ? JSON.stringify(slots) : `No open slots for ${specialty} this week.`;
-  },
-});
+export function makeAgentTools(patientId: string, askedBy: string, events: AgentEvent[]) {
+  const patient = getPatient(patientId);
 
-export const bookAppointment = betaZodTool({
-  name: "book_appointment",
-  description: "Book an appointment slot for a patient. Returns a confirmation.",
-  inputSchema: z.object({ patientName: z.string(), slotId: z.string() }),
-  run: async ({ patientName, slotId }) => {
-    // Faked: no real booking system behind this.
-    return JSON.stringify({ status: "confirmed", confirmation: `SKY-${slotId}`, patientName });
-  },
-});
+  const getApprovedUpdate = betaZodTool({
+    name: "get_approved_update",
+    description:
+      "Get the doctor-approved family update for the patient: status, why they are in hospital, today's update, next steps and expected discharge. This is the ONLY medical information you may share.",
+    inputSchema: z.object({}),
+    run: async () => {
+      const approvals = await getApprovals(patientId);
+      const latest = approvals.at(-1);
+      events.push({ tool: "get_approved_update", label: "Read the approved update" });
+      if (!latest) return "No approved update yet.";
+      const { update } = latest;
+      return JSON.stringify({
+        patient: patient?.name,
+        approvedBy: latest.approvedBy,
+        approvedAt: latest.approvedAt,
+        status: update.statusLabel,
+        whyHere: update.whyHere,
+        today: update.items.filter((i) => i.section === "today").map((i) => i.text),
+        next: update.items.filter((i) => i.section === "next").map((i) => `${i.when ? i.when + ": " : ""}${i.text}`),
+        expectedDischarge: update.discharge ?? "Not estimated yet by the doctor.",
+        earlierDays: approvals.slice(0, -1).map((a) => `${a.day}: ${a.update.headline}`),
+      });
+    },
+  });
 
-export const AGENT_TOOLS = [lookupPatient, findAppointmentSlots, bookAppointment];
+  const getWardInfo = betaZodTool({
+    name: "get_ward_info",
+    description: "Practical, non-medical ward information: location, visiting hours, parking, doctor phone hour, what to bring.",
+    inputSchema: z.object({}),
+    run: async () => {
+      events.push({ tool: "get_ward_info", label: "Checked ward info" });
+      return JSON.stringify(WARD_INFO);
+    },
+  });
+
+  const logQuestion = betaZodTool({
+    name: "log_question_for_doctor",
+    description:
+      "Pass a question you are not allowed to answer to the patient's doctor. Use it for any medical question beyond the approved update. Phrase the question clearly in English.",
+    inputSchema: z.object({ question: z.string().describe("The family member's question, clearly phrased") }),
+    run: async ({ question }) => {
+      await addQuestion(patientId, question, askedBy);
+      events.push({ tool: "log_question_for_doctor", label: `Question sent to ${DEMO_USER.shortName}` });
+      return `Logged for ${DEMO_USER.name}. It will appear on her review screen.`;
+    },
+  });
+
+  const bookCallbackSlot = betaZodTool({
+    name: "book_callback_slot",
+    description: "Book a personal callback from the doctor during the phone hour, for the question you just logged.",
+    inputSchema: z.object({}),
+    run: async () => {
+      const slot = await bookCallback(patientId);
+      events.push({ tool: "book_callback_slot", label: slot ? `Callback booked: ${slot}` : "No callback slot free" });
+      return slot ? `Booked: ${DEMO_USER.name} will call on ${slot}.` : "No free slots. Suggest the daily phone hour 12:00–13:00.";
+    },
+  });
+
+  return [getApprovedUpdate, getWardInfo, logQuestion, bookCallbackSlot];
+}

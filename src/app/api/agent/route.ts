@@ -1,42 +1,53 @@
 import { getClient, hasAnthropicKey, MODEL, textOf } from "@/lib/ai";
-import { AGENT_TOOLS } from "@/lib/agent-tools";
+import { makeAgentTools, type AgentEvent } from "@/lib/agent-tools";
 import { findFallback } from "@/data/fallbacks";
+import { DEMO_USER, getPatient } from "@/data/seed";
 
-const SYSTEM = `You are a helpful clinic assistant agent. Use the tools to look up
-patients and appointments before answering. Be concise. This is a demo with synthetic data.`;
+type Turn = { role: "user" | "assistant"; content: string };
 
-type Step = { tool: string; input: unknown };
+function systemFor(patientName: string, firstName: string, caller: string) {
+  return `You are MindPeace, a warm voice assistant for the family of ${patientName}, a patient on Ward 4B at Hospital São Rafael, Lisbon.
+You are speaking with ${caller}. Today is Saturday 26 September 2026.
 
-// POST /api/agent  { prompt }  ->  { text, steps, source }
-// `steps` lists the tool calls the agent made — show them in the UI, judges love seeing the agent "think".
+RULES
+- Medical information: ONLY what get_approved_update returns (approved by ${DEMO_USER.name}). Call it before answering anything about ${firstName}'s condition, plan or discharge.
+- Practical questions (visiting, parking, location): use get_ward_info.
+- Any medical question the approved update does not answer (diagnoses, test results, "is it cancer", prognosis): do not guess or hint. Say kindly that ${DEMO_USER.shortName} will answer personally, then call log_question_for_doctor AND book_callback_slot, and tell them the callback time.
+- Never invent or estimate dates. Only repeat the approved expected discharge.
+- This is spoken aloud: 2-3 short sentences, warm and calm, no lists, no markdown, no emojis.`;
+}
+
+// POST /api/agent  { patientId, caller, messages: [{role, content}] }  ->  { text, events, source }
+// `events` lists what the agent did (tool calls), shown as chips in the UI.
 export async function POST(req: Request) {
-  const { prompt } = (await req.json()) as { prompt?: string };
-  if (!prompt) return Response.json({ error: "prompt required" }, { status: 400 });
+  const { patientId = "maria", caller = "Ana Ferreira (daughter)", messages = [] } = (await req.json()) as {
+    patientId?: string;
+    caller?: string;
+    messages?: Turn[];
+  };
+  const patient = getPatient(patientId);
+  const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content;
+  if (!patient || !lastUser) return Response.json({ error: "patientId and messages required" }, { status: 400 });
   if (!hasAnthropicKey()) {
-    return Response.json({ text: findFallback(prompt), steps: [], source: "fallback" });
+    return Response.json({ text: findFallback(lastUser), events: [], source: "fallback" });
   }
 
-  const steps: Step[] = [];
+  const events: AgentEvent[] = [];
   try {
     const runner = getClient().beta.messages.toolRunner({
       model: MODEL,
-      max_tokens: 16000,
-      output_config: { effort: "medium" },
-      max_iterations: 8,
-      system: SYSTEM,
-      tools: AGENT_TOOLS,
-      messages: [{ role: "user", content: prompt }],
+      max_tokens: 4000,
+      output_config: { effort: "low" },
+      max_iterations: 6,
+      system: systemFor(patient.name, patient.firstName, caller),
+      tools: makeAgentTools(patientId, caller, events),
+      messages,
     });
     let last;
-    for await (const message of runner) {
-      for (const block of message.content) {
-        if (block.type === "tool_use") steps.push({ tool: block.name, input: block.input });
-      }
-      last = message;
-    }
-    return Response.json({ text: last ? textOf(last.content) : "", steps, source: "live" });
+    for await (const message of runner) last = message;
+    return Response.json({ text: last ? textOf(last.content) : "", events, source: "live" });
   } catch (err) {
     console.error("[agent] falling back:", err);
-    return Response.json({ text: findFallback(prompt), steps, source: "fallback", error: String(err) });
+    return Response.json({ text: findFallback(lastUser), events, source: "fallback", error: String(err) });
   }
 }
