@@ -4,7 +4,6 @@
 
 **Live demo:** [mindpeace-health.vercel.app](https://mindpeace-health.vercel.app) · Health check: [/status](https://mindpeace-health.vercel.app/status)
 
-<!-- TODO before submission (17:00): update status, screenshots, and "what's real" to match the final build. -->
 
 ## Problem
 
@@ -12,33 +11,40 @@ On a typical Lisbon hospital ward, **22 families share 3 doctors and one phone h
 
 ## Solution
 
-MindPeace turns the doctor's daily chart note into a **doctor-approved, plain-language update** for the family, plus a **voice agent** that answers family questions around the clock, using only approved information.
+MindPeace turns the doctor's daily chart note into a **doctor-approved, plain-language update** for the family, and gives families an assistant they can **call or chat with** around the clock, which only uses approved information.
 
-1. **Doctor view:** the AI splits the jargon note into ✅ shareable, 🔒 withheld (with a reason) and ✏️ "doctor should phrase this". One click approves it.
-2. **Family app:** a status the family can read in 5 seconds and a timeline up to the expected discharge.
-3. **Voice agent:** answers "When can I visit?". For "Does she have cancer?" it declines kindly, logs the question for the doctor and books a callback.
-4. **Back to the doctor:** one question queue instead of 15 phone calls.
+1. **Doctor view:** the AI drafts the family update from the jargon note and tags every statement: **safe to share** (what a nurse may already say), **needs approval** (medical content), **withheld** (e.g. a new diagnosis the patient hasn't heard yet, or a suspicious finding, with a reason) and **care team only** (nursing instructions). The doctor can switch items off or reword them, then approves with one click.
+2. **Family phone:** a push notification on the lock screen, then a status the family can read in 5 seconds, day chips, and a timeline up to the expected discharge (always labelled as an estimate, never invented). A care-team section shows who is looking after their mother.
+3. **Call or chat:** a real-time voice call (ElevenLabs) or a chat answers "When can I visit?" or "When can she come home?". For "Does she have cancer?" it declines kindly, passes the question to the doctor and books a callback in the phone hour.
+4. **Back to the doctor:** one question list with booked callbacks, instead of 15 phone calls.
 
-*We didn't invent the rules. We encoded the rules nurses already follow:* nursing-scope facts are shareable, medical findings need the doctor's approval, and internal team instructions are never shared.
+*We didn't invent the rules. We encoded the rules nurses already follow* (see [`docs/research/nurse-input.md`](docs/research/nurse-input.md)).
+
+## Try it
+
+1. Open [/doctor](https://mindpeace-health.vercel.app/doctor) in one window and [/family/maria](https://mindpeace-health.vercel.app/family/maria) in a narrow second window.
+2. In the doctor view, open **Maria Ferreira**, optionally click **New radiology report** (the AI must hold the new finding back), then **Approve update**.
+3. Watch the push notification arrive on the family lock screen, tap it, then call or chat about Maria.
+4. **Reset demo** on the [start page](https://mindpeace-health.vercel.app) clears today's approvals and questions.
 
 ## How it works
 
-A Next.js app on Vercel. Claude reads the chart note and classifies every statement against the nurse/doctor boundary. The voice agent is Claude with tools (`get_approved_update`, `log_question_for_doctor`, `book_callback_slot`) that can only read doctor-approved content. ElevenLabs gives it a voice, and Supabase stores approvals and questions. Every AI call has a cached fallback, so the demo keeps working even if the WiFi drops.
+A Next.js app on Vercel. Claude (Sonnet 5 via OpenRouter) turns the chart note into a draft, and the server checks that every step of the doctor's plan made it in. The chat is Claude with tools that can only read approved content. The call is an ElevenLabs Conversational AI agent whose tools run inside our app. Supabase shares approvals and questions between the doctor's and the family's screens. Every AI path has a fallback, so the demo keeps working even if the WiFi drops.
 
-Full technical setup: [`docs/architecture.md`](docs/architecture.md) · Design decisions: [`docs/decisions/`](docs/decisions/)
+Full technical setup: [`docs/architecture.md`](docs/architecture.md) · Design system: [`DESIGN.md`](DESIGN.md) · Decisions: [`docs/decisions/`](docs/decisions/)
 
 | Layer | Tech |
 |---|---|
-| App | Next.js 16 (App Router, TypeScript), Tailwind v4, shadcn/ui |
-| AI | Anthropic Claude via `@anthropic-ai/sdk` (Tool Runner for the agent) |
-| Voice | ElevenLabs text-to-speech |
+| App | Next.js 16 (App Router, TypeScript), Tailwind v4, shadcn/ui, Poppins |
+| AI | Claude Sonnet 5 via OpenRouter (Anthropic SDK, tool runner) |
+| Voice | ElevenLabs Conversational AI (real-time call, client tools) |
 | Data | Supabase Postgres (EU) + synthetic seed data |
 | Hosting | Vercel, auto-deploy from GitHub |
 
 ## What's real vs. simulated
 
-- **Real:** chart note → filtered briefing (Claude), the approval flow, the family status view, the voice agent and its tool calls.
-- **Simulated for the demo:** hospital record system (EHR) integration, login and relative verification, push notifications, the callback calendar.
+- **Real:** chart note → filtered draft (live AI), the approval flow, live updates to the family phone, the chat agent and the voice call with their tool calls, the doctor's question list.
+- **Simulated for the demo:** hospital record system (EHR) integration, login and relative verification, real push notifications (drawn in the page), the callback calendar.
 - **Data:** 100% synthetic. No real patient data was used.
 
 ## What production would need

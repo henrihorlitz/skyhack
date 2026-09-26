@@ -1,98 +1,123 @@
 # Architecture
 
 > Source of truth for the technical setup. **Agents: update this file (and the status column) whenever you add or change a route, table, tool or service.**
-> Last verified: 2026-09-26 morning (all services green on `/status`, live agent + TTS tested on production).
+> Last verified: 2026-09-26 14:40 (all services green on `/status`, full demo path tested on production).
 
 ## Overview
 
-MindPeace is a single Next.js app deployed on Vercel. The browser never talks to an AI or database provider with a secret key. All AI and voice calls go through our own API routes, which hold the keys server-side and **always return something**: if a provider fails, they serve a cached answer, so the live demo can't crash.
+MindPeace is a single Next.js app on Vercel with two screens: the **doctor view** (desktop) and the **family app** (a phone-sized window that starts on an iPhone lock screen). The browser never holds a secret key. All AI and voice calls go through our own API routes, and **every AI path has a fallback**, so the live demo can't crash.
 
 ```mermaid
 flowchart LR
   subgraph Browser
-    D[Doctor view]
-    F[Family app]
+    D[Doctor view<br/>/doctor, /doctor/:id]
+    F[Family app<br/>/family/:id<br/>lock screen → timeline]
+    CH[Chat]
+    CA[Voice call]
   end
   subgraph Vercel["Vercel (Next.js 16, server)"]
-    AI["/api/ai<br/>single Claude call"]
-    AG["/api/agent<br/>Claude + tools"]
-    TTS["/api/tts<br/>text → speech"]
-    ST["/status<br/>health check"]
-    FB[("fallbacks.ts<br/>cached answers")]
-    SEED[("seed.ts<br/>synthetic data")]
+    DR["/api/draft<br/>note → filtered draft"]
+    AP["/api/approve"]
+    STt["/api/state<br/>polled every 2 s"]
+    AG["/api/agent<br/>chat: Claude + tools"]
+    VS["/api/voice-session<br/>signed URL"]
+    VT["/api/voice-tool<br/>call's tools"]
+    RS["/api/reset"]
+    FB[("fallbacks<br/>prepared drafts +<br/>offline answers")]
   end
-  C[Anthropic API<br/>Claude]
-  E[ElevenLabs API]
-  S[(Supabase Postgres<br/>London)]
+  OR[OpenRouter<br/>Claude Sonnet 5]
+  EL[ElevenLabs<br/>Conversational AI]
+  S[(Supabase Postgres<br/>approvals, questions)]
 
-  D & F --> AI & AG & TTS
-  AI & AG --> C
-  AG -- tool calls --> SEED
-  AG -. tool calls .-> S
-  TTS --> E
-  AI & AG -. on error / timeout .-> FB
-  D & F -. reads/writes .-> S
+  D --> DR & AP & STt
+  F --> STt
+  CH --> AG
+  CA -- WebRTC/WS audio --> EL
+  CA --> VS & VT
+  DR & AG --> OR
+  VS --> EL
+  AP & STt & AG & VT & RS --> S
+  DR & AG -. on error .-> FB
 ```
+
+## Demo flow (what calls what)
+
+1. **Ward overview** (`/doctor`) prefetches today's drafts in the background (`fetchDraft` in `src/lib/client.ts`), like a daily job would.
+2. **Review** (`/doctor/maria`): `/api/draft` → `generateDraft()` sends the chart note + its numbered PLAN items to Claude. Claude returns `today`/`next` lists, `withheld` items and a `planSkipped` list. The server checks that **every plan item** is covered, retries once if not, and falls back to a prepared draft if the AI fails.
+3. Doctor toggles/edits items → **Approve update** → `/api/approve` writes to `approvals` (only switched-on items).
+4. **Family app** polls `/api/state` every 2 s. A new approval → iOS-style **push notification** on the lock screen 1.5 s later → tap → timeline with the new day highlighted.
+5. **Chat** → `/api/agent`: Claude tool runner with `get_approved_update`, `get_ward_info`, `log_question_for_doctor`, `book_callback_slot`.
+6. **Call** → `/api/voice-session` returns a short-lived signed URL → the browser talks to the **ElevenLabs agent** directly. Its client tools (`get_approved_update`, `get_ward_info`, `pass_question_to_doctor`) run in our app via `/api/voice-tool`, so the voice agent only ever sees approved data.
+7. Logged questions show up on the doctor's review screen (with the booked callback) and as a badge in the ward overview.
 
 ## Components
 
 | Part | File(s) | What it does | Status |
 |---|---|---|---|
-| Single AI call | `src/lib/ai.ts` → `askClaude()`, `src/app/api/ai/route.ts` | One Claude request with timeout, server-side refusal fallback and cached-answer fallback | ✅ live |
-| Agent | `src/app/api/agent/route.ts`, tools in `src/lib/agent-tools.ts` | Claude runs a tool-use loop (SDK Tool Runner, max 8 iterations) and returns the answer **plus the list of tool calls** so the UI can show the agent's steps | ✅ live (demo tools) |
-| Agent tools (current) | `src/lib/agent-tools.ts` | `lookup_patient`, `find_appointment_slots`, `book_appointment` on seed data | ✅ starter, to be replaced |
-| Agent tools (MindPeace) | `src/lib/agent-tools.ts` | `get_approved_update`, `log_question_for_doctor`, `book_callback_slot` | ⬜ planned |
-| Voice | `src/app/api/tts/route.ts`, `src/components/speak-button.tsx` | ElevenLabs text-to-speech (`eleven_flash_v2_5`, low latency). Falls back to the browser's built-in voice | ✅ live |
-| Fake actions | `src/lib/fake.ts` → `fakeAction()` | Loading toast → success toast, for things we don't build (push, calendar, EHR) | ✅ |
-| Seed data | `src/data/seed.ts` | Fixed demo user + synthetic patients. **No real patient data, ever** | ✅ starter, MindPeace notes ⬜ |
-| Cached AI answers | `src/data/fallbacks.ts` | Served when the AI call fails; keyed by a word in the input | ✅ generic, real demo answers ⬜ |
-| Database client | `src/lib/supabase.ts` → `getSupabase()` | Supabase JS client with the publishable key, no auth. Returns `null` if not configured | ✅ connected, no tables yet |
-| Health check | `src/app/status/page.tsx` | 🟢/🔴 per service. Note: Anthropic/ElevenLabs rows only check the key *exists*, not that it's valid | ✅ |
-| Doctor view | — | Chart note → briefing (✅ shareable / 🔒 withheld / ✏️ doctor phrases) → approve | ⬜ planned |
-| Family app | — | Status pill + timeline + voice agent | ⬜ planned |
-| UI kit | `src/components/ui/*` | shadcn/ui on Base UI, Tailwind v4 theme tokens in `src/app/globals.css`. Visual identity lives in `DESIGN.md`, applied via the tokens in `globals.css` (Poppins, mint canvas, teal, coral for withheld) | ✅ |
+| AI client | `src/lib/ai.ts` → `askClaude()`, `getClient()` | OpenRouter (Anthropic-compatible endpoint) when `OPENROUTER_API_KEY` is set, else Anthropic directly. Timeout + cached fallback | ✅ live |
+| Draft filter | `src/lib/draft.ts`, route `src/app/api/draft` | Chart note → family draft. Rules mirror what nurses may say (`docs/research/nurse-input.md`). Plan-coverage check + retry + prepared fallback | ✅ live |
+| Approvals & state | `src/lib/store.ts`, routes `approve`, `state`, `reset` | Seed approvals (past days) + live rows in Supabase. In-memory fallback without Supabase env | ✅ live |
+| Chat agent | `src/app/api/agent/route.ts`, `src/lib/agent-tools.ts` | Claude tool runner, returns answer + `events` (shown as chips) | ✅ live |
+| Offline chat | `src/lib/offline-agent.ts` | No AI → answers from approved data; medical questions still logged with a callback | ✅ |
+| Voice call | `src/components/family/call-screen.tsx`, routes `voice-session`, `voice-tool`, agent config `scripts/create-voice-agent.ts` | ElevenLabs Conversational AI (Claude as LLM), real-time, client tools, voice-reactive wave | ✅ live |
+| Doctor view | `src/app/doctor/*`, `src/components/doctor/*` | Ward overview (22 beds), review screen (note ↔ editable draft, withheld panel, family questions), one-click "New radiology report" for the judge demo | ✅ live |
+| Family app | `src/app/family/[id]`, `src/components/family/*` | Lock screen + push, status headline, day chips, "why she's here", timeline to expected discharge, care team section, call + chat buttons | ✅ live |
+| Seed data | `src/data/seed.ts`, `src/data/notes.ts` | Hospital, doctor, 3 real patients + 19 static beds, past approvals, today's chart notes. **Synthetic only** | ✅ |
+| Fallbacks | `src/data/fallback-drafts.ts`, `src/data/fallbacks.ts` | Prepared drafts per patient (+ judge-trick variant), generic voice answers | ✅ |
+| Design system | `DESIGN.md`, tokens in `src/app/globals.css`, `src/components/brand.tsx` | Poppins, mint canvas, teal for actions, coral only for withheld, pills, soft shadows | ✅ |
+| Health check | `src/app/status/page.tsx` | 🟢/🔴 per service (checks keys exist + Supabase reachable) | ✅ |
+
+## Database (Supabase, project `qwuswyylymbwzdrqhjpk`)
+
+| Table | Columns | Notes |
+|---|---|---|
+| `approvals` | `patient_id`, `day`, `update` (jsonb `FamilyUpdate`), `approved_by`, `approved_at` | Today's approvals. Past days come from seed data |
+| `questions` | `patient_id`, `question`, `asked_by`, `callback_slot`, `created_at` | Logged by chat or call |
+
+RLS is on with **open demo policies** (anon can read/insert/delete). Fine for synthetic data, not for production.
 
 ## Reliability design (why the demo can't crash)
 
-1. **Every AI route has a fallback.** No key, timeout (25 s), network error or refusal → cached answer, response marked `source: "fallback"`.
-2. **Server-side refusal fallback.** Claude requests send `fallbacks: "default"` (beta `server-side-fallback-2026-07-01`): if a safety classifier declines, Anthropic re-runs the request on a fallback model inside the same call.
-3. **Voice degrades gracefully.** ElevenLabs down → browser `speechSynthesis`.
-4. **One retry, short timeouts.** `maxRetries: 1` so a hanging provider costs seconds, not minutes.
-5. **Pre-demo check:** open `/status` on the live URL; then run the demo path once to warm up.
+1. **Drafts:** plan-coverage check + one retry; AI failure → prepared draft for that patient (incl. the judge-trick variant).
+2. **Chat:** AI failure → `offlineAnswer()` from approved data; medical questions still reach the doctor.
+3. **Call:** mic denied or ElevenLabs unreachable → "Call failed, please use the chat".
+4. **Prefetch:** the ward overview prepares drafts, so the review screen opens instantly.
+5. **Reset:** "Reset demo" on the start page clears today's approvals and questions.
+6. **Pre-demo check:** `/status` green on the live URL; run the demo once to warm up.
 
 ## Services & accounts
 
 | Service | What for | Where configured |
 |---|---|---|
 | **Vercel** (Hobby) | Hosting, auto-deploy from GitHub `main` | Project `henri-horlitz/skyhack`, domain `mindpeace-health.vercel.app` |
-| **GitHub** | Code, private repo | `henrihorlitz/skyhack` (Vercel GitHub app has access to this repo only) |
-| **Anthropic** | Claude (model from `ANTHROPIC_MODEL`, currently `claude-sonnet-5` for speed) | Dedicated workspace "skyhack" with its own spend limit |
-| **ElevenLabs** | Text-to-speech | API key with TTS permission |
-| **Supabase** | Postgres | Project `qwuswyylymbwzdrqhjpk` ("Skyhack"), region eu-west-2 (London) |
+| **GitHub** | Code, private repo | `henrihorlitz/skyhack` |
+| **OpenRouter** | Claude for drafts and chat (`anthropic/claude-sonnet-5`) | Key in Vercel env |
+| **ElevenLabs** | Voice agent (Conversational AI) + TTS | Agent `ELEVENLABS_AGENT_ID`, created by `scripts/create-voice-agent.ts` |
+| **Supabase** | Postgres | Project `qwuswyylymbwzdrqhjpk` ("Skyhack"), eu-west-2 (London) |
 
 ## Environment variables
 
-Template: `.env.example`. Local values: `.env.local` (gitignored). Production: Vercel project env vars (production + preview).
+Template: `.env.example`. Local: `.env.local` (gitignored). Production: Vercel env vars (production + preview).
 
 | Variable | Required | Default | Notes |
 |---|---|---|---|
-| `ANTHROPIC_API_KEY` | for live AI | — | Without it, AI routes serve fallbacks |
-| `ANTHROPIC_MODEL` | no | `claude-opus-5` | `claude-sonnet-5` = faster/cheaper |
-| `ANTHROPIC_EFFORT` | no | `medium` | `low` / `medium` / `high` |
+| `OPENROUTER_API_KEY` | for live AI | — | Preferred provider when set |
+| `OPENROUTER_MODEL` | no | `anthropic/claude-sonnet-5` | Any OpenRouter model id |
+| `ANTHROPIC_API_KEY` | alternative | — | Used only when no OpenRouter key |
+| `ANTHROPIC_MODEL` / `ANTHROPIC_EFFORT` | no | `claude-opus-5` / `medium` | |
 | `AI_TIMEOUT_MS` | no | `25000` | Per request |
-| `ELEVENLABS_API_KEY` | for real voice | — | Without it: browser voice |
-| `ELEVENLABS_VOICE_ID` | no | George (`JBFqnCBsd6RMkjVDRZzb`) | |
-| `ELEVENLABS_MODEL_ID` | no | `eleven_flash_v2_5` | |
-| `NEXT_PUBLIC_SUPABASE_URL` | for DB | — | Public by design |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | for DB | — | Public by design. **Never** put the secret/service key in a `NEXT_PUBLIC_` var |
+| `ELEVENLABS_API_KEY` | for voice | — | Server-side only |
+| `ELEVENLABS_AGENT_ID` | for calls | — | From `bun scripts/create-voice-agent.ts` |
+| `ELEVENLABS_VOICE_ID` | no | George | |
+| `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | for DB | — | Public by design. **Never** a secret key here |
 | `VERCEL_TOKEN` | local CLI only | — | Not uploaded to Vercel |
 
 Changing a variable on Vercel needs a redeploy to take effect.
 
 ## Deploy pipeline
 
-`git push origin main` → Vercel builds (~20 s) → live on `mindpeace-health.vercel.app`.
-Manual: `bunx vercel@latest deploy --prod --token "$VERCEL_TOKEN"`. Update an env var: `printf '%s' "$VALUE" | bunx vercel@latest env add NAME production --force --token "$VERCEL_TOKEN"`.
+`git push origin main` → Vercel builds → live on `mindpeace-health.vercel.app`.
+Manual: `bunx vercel --prod --token "$VERCEL_TOKEN"`. Env var: `printf '%s' "$VALUE" | bunx vercel env add NAME production --token "$VERCEL_TOKEN"`.
 
 ## Local development
 
@@ -105,17 +130,16 @@ bun run build                # must pass before pushing
 
 ## How to extend
 
-- **New agent tool:** add a `betaZodTool({ name, description, inputSchema, run })` in `src/lib/agent-tools.ts` and include it in `AGENT_TOOLS`. The description is what Claude reads to decide when to call it, so be specific.
-- **New AI feature:** call `askClaude(prompt, system)` from a route. Don't create new Anthropic clients elsewhere.
-- **New table:** create it via the Supabase MCP/connector on project `qwuswyylymbwzdrqhjpk` only, then read/write with `getSupabase()`. Keep seed data as a fallback if the DB is empty.
-- **Record demo fallbacks:** once the demo path is final, run it live and paste the real answers into `src/data/fallbacks.ts`.
+- **New chat tool:** add a `betaZodTool` in `makeAgentTools()` (`src/lib/agent-tools.ts`). For the voice call, also add it to `scripts/create-voice-agent.ts`, re-run it with the agent id, and handle it in `/api/voice-tool` + `call-screen.tsx`.
+- **New AI feature:** call `askClaude(prompt, system)`. Don't create new SDK clients elsewhere.
+- **New patient:** add to `PATIENTS` + `TODAY_NOTES` (+ past approvals and a prepared draft for the fallback).
 
 ## Known gotchas
 
-- **`ANTHROPIC_BASE_URL` in Claude Code's shell** would redirect the SDK; `getClient()` pins `baseURL` to `https://api.anthropic.com`.
+- **`ANTHROPIC_BASE_URL` in Claude Code's shell** would redirect the SDK; `getClient()` pins the base URL.
 - **Empty env vars** (`FOO=`) count as unset: use `||`, not `??`, for defaults.
-- **Anthropic keys must be workspace-scoped**, otherwise the API returns 400 `anthropic-workspace-id`.
-- **Vercel deployment protection:** generated `*-henri-horlitz.vercel.app` URLs require a Vercel login. Share only `mindpeace-health.vercel.app`.
-- **Vercel Hobby + private repo:** commits by other GitHub users won't deploy.
-- **Supabase connector is account-wide:** it can see Henri's other projects. Only touch `qwuswyylymbwzdrqhjpk`.
-- **Next.js 16** differs from older versions: check `node_modules/next/dist/docs/` before using unfamiliar APIs (see `AGENTS.md`).
+- **The browser pane in the Claude desktop app blocks the microphone**: test calls in Chrome.
+- **Opening a patient directly** (not via the ward overview) takes 10–20 s for the first draft.
+- **Vercel deployment protection:** generated `*-henri-horlitz.vercel.app` URLs require a login. Share only `mindpeace-health.vercel.app`.
+- **Supabase connector is account-wide:** only touch `qwuswyylymbwzdrqhjpk`.
+- **Next.js 16** differs from older versions: check `node_modules/next/dist/docs/` (see `AGENTS.md`).
