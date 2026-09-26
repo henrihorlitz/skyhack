@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { TopBar } from "@/components/doctor/top-bar";
+import { DemoFooter, TopBar } from "@/components/doctor/top-bar";
 import { ReviewScreen } from "@/components/doctor/review-screen";
 import { getPatient } from "@/data/seed";
 import { TODAY_NOTES } from "@/data/notes";
@@ -12,6 +12,7 @@ export default async function ReviewPage({ params }: PageProps<"/doctor/[id]">) 
     <>
       <TopBar />
       <ReviewScreen patient={patient} initialNote={TODAY_NOTES[id]} />
+      <DemoFooter />
     </>
   );
 }

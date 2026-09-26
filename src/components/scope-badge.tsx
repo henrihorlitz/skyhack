@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 type Kind = "nursing" | "medical" | "withheld" | "internal";
 
 const STYLES: Record<Kind, { label: string; className: string }> = {
-  nursing: { label: "Nursing scope", className: "bg-nursing-soft text-nursing" },
+  nursing: { label: "Safe to share", className: "bg-nursing-soft text-nursing" },
   medical: { label: "Needs your approval", className: "bg-medical-soft text-medical" },
   withheld: { label: "Withheld", className: "bg-withheld-soft text-withheld" },
   internal: { label: "Care team only", className: "bg-internal-soft text-internal" },

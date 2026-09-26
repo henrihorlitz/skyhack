@@ -1,4 +1,4 @@
-import { TopBar } from "@/components/doctor/top-bar";
+import { DemoFooter, TopBar } from "@/components/doctor/top-bar";
 import { WardOverview } from "@/components/doctor/ward-overview";
 
 export default function DoctorPage() {
@@ -6,6 +6,7 @@ export default function DoctorPage() {
     <>
       <TopBar />
       <WardOverview />
+      <DemoFooter />
     </>
   );
 }

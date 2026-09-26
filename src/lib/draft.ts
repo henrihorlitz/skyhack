@@ -17,9 +17,11 @@ FILTER RULES (these mirror what nurses may legally say vs. what only doctors may
   - suspicious, unconfirmed or serious findings (e.g. suspected cancer): these are discussed in person,
   - prognosis, severity scores and goals-of-care topics: discussed in person.
   Give a short, respectful reason a doctor would agree with.
+  Never hint at a withheld topic anywhere else, not even indirectly ("the doctor will discuss her blood sugar", "a spot on the X-ray"). Leave it out completely.
 - INTERNAL (kind "internal"): instructions for the care team: blood draw times, medication names and doses, fluid orders, monitoring orders. Summarise each briefly.
 - Never repeat raw numbers (lab values, doses, scores). Translate them into meaning ("the infection is clearly improving").
 - If an exam is planned, you may say it is planned and its general purpose ("to check the lungs"), but never mention a withheld finding as its reason.
+- ALWAYS keep every planned exam, procedure and treatment change from the plan as a "next" item, even when a withheld finding relates to it. Describe it neutrally. Families must never see an empty "what's next".
 
 DISCHARGE: copy the expected discharge only if the note states one, including its condition, e.g. "Tuesday 29 September, if tomorrow's scan is clear". If the note has no date, use null. NEVER estimate or invent a date.
 
@@ -59,8 +61,16 @@ export async function generateDraft(note: string, patient: Patient) {
 
 CHART NOTE:
 ${note}`;
-  const result = await askClaude(prompt, SYSTEM);
-  const live = parseUpdate(result.text);
+  let result = await askClaude(prompt, SYSTEM);
+  let live = parseUpdate(result.text);
+  // The model sometimes drops the plan when a finding is withheld. Ask once more, explicitly.
+  if (live && result.source === "live" && !live.items.some((i) => i.section === "next")) {
+    result = await askClaude(
+      `${prompt}\n\nIMPORTANT: your previous draft had no "next" items. Include every planned exam and treatment change from the PLAN as a neutral "next" item.`,
+      SYSTEM,
+    );
+    live = parseUpdate(result.text) ?? live;
+  }
   if (live) return { update: live, source: result.source };
   // Live answer was unusable: serve the cached draft for this note instead.
   const cached = parseUpdate(findFallback(prompt));

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 type Row =
   | { kind: "real"; bed: number; id: string; name: string; age: number; approvedAt?: string; headline?: string; questions: number }
-  | { kind: "other"; bed: number; name: string };
+  | { kind: "other"; bed: number; name: string; age: number; headline: string; approvedAt: string };
 
 export function WardOverview() {
   const state = useDemoState();
@@ -40,7 +40,6 @@ export function WardOverview() {
 
   const real = rows.filter((r) => r.kind === "real");
   const needsAction = real.filter((r) => !r.approvedAt || r.questions > 0);
-  const rest = rows.filter((r) => !needsAction.includes(r as (typeof real)[number]));
   const drafts = real.filter((r) => !r.approvedAt).length;
   const questions = real.reduce((n, r) => n + r.questions, 0);
 
@@ -71,9 +70,7 @@ export function WardOverview() {
       )}
       <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">All beds</h2>
       <div className="overflow-hidden rounded-xl border bg-card">
-        {rest.map((r) =>
-          r.kind === "real" ? <PatientRow key={r.bed} row={r} /> : <OtherRow key={r.bed} bed={r.bed} name={r.name} />,
-        )}
+        {rows.map((r) => (r.kind === "real" ? <PatientRow key={r.bed} row={r} /> : <OtherRow key={r.bed} row={r} />))}
       </div>
     </main>
   );
@@ -121,15 +118,20 @@ function PatientRow({ row }: { row: Extract<Row, { kind: "real" }> }) {
   );
 }
 
-function OtherRow({ bed, name }: { bed: number; name: string }) {
+function OtherRow({ row }: { row: Extract<Row, { kind: "other" }> }) {
   return (
-    <div className="flex items-center gap-4 border-b px-4 py-2.5 text-muted-foreground/70 last:border-b-0">
-      <span className="w-10 text-sm">{bed}</span>
-      <span className="flex-1 text-sm">{name}</span>
-      <span className="inline-flex w-36 items-center gap-1 text-sm">
-        <CircleCheck className="size-4" /> Approved
+    <div className="flex items-center gap-4 border-b px-4 py-3 last:border-b-0">
+      <span className="w-10 text-sm text-muted-foreground">{row.bed}</span>
+      <div className="min-w-0 flex-1">
+        <div className="font-medium">
+          {row.name} <span className="font-normal text-muted-foreground">· {row.age}</span>
+        </div>
+        <div className="truncate text-sm text-muted-foreground">{row.headline}</div>
+      </div>
+      <span className="inline-flex w-36 items-center gap-1 text-sm text-nursing">
+        <CircleCheck className="size-4" /> Approved {row.approvedAt}
       </span>
-      <span className="size-4" />
+      <ChevronRight className="size-4 text-muted-foreground/30" />
     </div>
   );
 }

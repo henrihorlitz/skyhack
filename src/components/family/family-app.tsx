@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
-import { Phone } from "lucide-react";
+import { useState } from "react";
+import { MessageCircle, Phone } from "lucide-react";
 import { Logo } from "@/components/brand";
 import { Timeline } from "@/components/family/timeline";
-import { VoiceAgent } from "@/components/family/voice-agent";
-import { relativeDay, timeLabel, useDemoState } from "@/lib/client";
+import { ChatAgent } from "@/components/family/chat-agent";
+import { CallScreen } from "@/components/family/call-screen";
+import { relativeDay, timeLabel } from "@/lib/client";
 import { DEMO_USER, HOSPITAL } from "@/data/seed";
-import type { Patient } from "@/lib/types";
+import type { Approval, Patient } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLE = {
@@ -17,25 +17,11 @@ const STATUS_STYLE = {
   attention: "bg-medical-soft text-medical",
 };
 
-export function FamilyApp({ patient }: { patient: Patient }) {
-  const state = useDemoState(patient.id);
-  const [calling, setCalling] = useState(false);
-  const [freshDay, setFreshDay] = useState<string>();
-  const seen = useRef<string | null>(null);
+type Props = { patient: Patient; approvals: Approval[]; freshDay?: string };
 
-  const approvals = state?.approvals ?? [];
+export function FamilyApp({ patient, approvals, freshDay }: Props) {
+  const [mode, setMode] = useState<"call" | "chat" | null>(null);
   const latest = approvals.at(-1);
-
-  // A new approval arriving while the app is open: announce it like a push notification.
-  useEffect(() => {
-    if (!latest) return;
-    const key = latest.approvedAt;
-    if (seen.current && seen.current !== key) {
-      toast.success(`New update about ${patient.firstName}`, { description: `Approved by ${DEMO_USER.name}` });
-      setFreshDay(latest.day);
-    }
-    seen.current = key;
-  }, [latest, patient.firstName]);
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col bg-muted/30">
@@ -44,7 +30,7 @@ export function FamilyApp({ patient }: { patient: Patient }) {
         <span className="text-xs text-muted-foreground">{HOSPITAL.ward}</span>
       </header>
 
-      <main className="flex flex-1 flex-col gap-5 px-5 pb-28">
+      <main className="flex flex-1 flex-col gap-5 px-5 pb-44">
         <section className="rounded-2xl bg-card p-5 shadow-sm ring-1 ring-border">
           <p className="text-xs text-muted-foreground">
             {HOSPITAL.name} · Bed {patient.bed}
@@ -85,16 +71,30 @@ export function FamilyApp({ patient }: { patient: Patient }) {
         </section>
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 mx-auto w-full max-w-md bg-gradient-to-t from-background via-background/95 to-transparent px-5 pt-6 pb-5">
-        <button
-          onClick={() => setCalling(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 font-semibold text-primary-foreground shadow-lg active:scale-[0.99]"
-        >
-          <Phone className="size-5" /> Ask about {patient.firstName}
-        </button>
+      <div className="fixed right-5 bottom-6 flex flex-col items-end gap-3">
+        <Fab label="Chat" onClick={() => setMode("chat")} className="bg-card text-foreground ring-1 ring-border">
+          <MessageCircle className="size-6" />
+        </Fab>
+        <Fab label={`Call about ${patient.firstName}`} onClick={() => setMode("call")} className="bg-nursing text-white">
+          <Phone className="size-6" />
+        </Fab>
       </div>
 
-      {calling && <VoiceAgent patient={patient} onClose={() => setCalling(false)} />}
+      {mode === "chat" && <ChatAgent patient={patient} onClose={() => setMode(null)} />}
+      {mode === "call" && <CallScreen patient={patient} onClose={() => setMode(null)} />}
     </div>
+  );
+}
+
+function Fab({ label, onClick, className, children }: { label: string; onClick: () => void; className?: string; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      className={cn("grid size-14 place-items-center rounded-full shadow-lg transition-transform active:scale-95", className)}
+    >
+      {children}
+    </button>
   );
 }

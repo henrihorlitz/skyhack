@@ -26,9 +26,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         {children}
-        <footer className="px-4 py-6 text-center text-xs text-muted-foreground">
-          Prototype built at SKYHACK 2026 · Demo uses synthetic data only · Not medical advice
-        </footer>
         <Toaster position="top-center" />
       </body>
     </html>

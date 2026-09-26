@@ -24,3 +24,12 @@ export function TopBar() {
     </header>
   );
 }
+
+// Shown under the doctor screens and the launcher (not in the family phone view).
+export function DemoFooter() {
+  return (
+    <footer className="px-4 py-6 text-center text-xs text-muted-foreground">
+      Prototype built at SKYHACK 2026 · Synthetic data only · Not medical advice
+    </footer>
+  );
+}

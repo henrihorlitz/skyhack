@@ -64,13 +64,28 @@ export const PATIENTS: Patient[] = [
   },
 ];
 
-// The other beds on the ward: only shown grayed out in the ward overview, to show scale.
-export const OTHER_BEDS = [
-  "Manuel Sousa", "Fernanda Lopes", "António Pereira", "Graça Martins", "Carlos Rodrigues",
-  "Helena Carvalho", "José Gomes", "Conceição Ribeiro", "Luís Fernandes", "Teresa Pinto",
-  "Joaquim Marques", "Isabel Teixeira", "Francisco Moreira", "Rosário Correia", "Artur Mendes",
-  "Beatriz Nunes", "Alberto Vieira", "Lúcia Monteiro", "Fernando Cardoso",
-].map((name, i) => ({ bed: [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19, 20, 21, 22][i], name }));
+// The other beds on the ward: static, already approved today. Shown in the ward overview for scale.
+export const OTHER_BEDS: { bed: number; name: string; age: number; headline: string; approvedAt: string }[] = [
+  { bed: 1, name: "Manuel Sousa", age: 74, headline: "Blood sugar back under control", approvedAt: "08:52" },
+  { bed: 2, name: "Fernanda Lopes", age: 81, headline: "Resting comfortably after a fall", approvedAt: "09:05" },
+  { bed: 3, name: "António Pereira", age: 67, headline: "Kidney function improving", approvedAt: "09:11" },
+  { bed: 4, name: "Graça Martins", age: 88, headline: "Eating better, more alert", approvedAt: "09:18" },
+  { bed: 5, name: "Carlos Rodrigues", age: 59, headline: "Going home tomorrow", approvedAt: "09:24" },
+  { bed: 6, name: "Helena Carvalho", age: 76, headline: "Infection responding to treatment", approvedAt: "09:31" },
+  { bed: 8, name: "José Gomes", age: 71, headline: "Scan booked for Monday", approvedAt: "09:40" },
+  { bed: 9, name: "Conceição Ribeiro", age: 84, headline: "Walking with the physiotherapist", approvedAt: "09:47" },
+  { bed: 10, name: "Luís Fernandes", age: 63, headline: "Stable, pain well controlled", approvedAt: "09:55" },
+  { bed: 11, name: "Teresa Pinto", age: 79, headline: "Breathing easier today", approvedAt: "10:02" },
+  { bed: 13, name: "Joaquim Marques", age: 90, headline: "Comfortable, family visiting", approvedAt: "10:10" },
+  { bed: 14, name: "Isabel Teixeira", age: 69, headline: "New medication started", approvedAt: "10:16" },
+  { bed: 16, name: "Francisco Moreira", age: 77, headline: "Fever gone since last night", approvedAt: "10:23" },
+  { bed: 17, name: "Rosário Correia", age: 85, headline: "Waiting for a rehab place", approvedAt: "10:29" },
+  { bed: 18, name: "Artur Mendes", age: 72, headline: "Heart rhythm settled", approvedAt: "10:36" },
+  { bed: 19, name: "Beatriz Nunes", age: 58, headline: "Tests came back reassuring", approvedAt: "10:44" },
+  { bed: 20, name: "Alberto Vieira", age: 80, headline: "Stable, sleeping well", approvedAt: "10:51" },
+  { bed: 21, name: "Lúcia Monteiro", age: 73, headline: "Drip stopped, drinking well", approvedAt: "10:58" },
+  { bed: 22, name: "Fernando Cardoso", age: 66, headline: "Going home on Monday", approvedAt: "11:07" },
+];
 
 export const CALLBACK_SLOTS = [
   "Sun 27 Sep, 12:15",
