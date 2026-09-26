@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Home } from "lucide-react";
 import { relativeDay } from "@/lib/client";
 import { DEMO_TODAY } from "@/data/seed";
@@ -101,34 +101,123 @@ function Node({
   );
 }
 
-// DESIGN.md day chips: one per day of the stay, today in teal. Tapping a day jumps to it.
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+// "Tuesday 29 September, if the scan is clear" → "2026-09-29". Only reads a date the doctor approved.
+function dischargeDay(text: string | null | undefined): string | null {
+  const m = text?.match(/(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3})[a-z]*/);
+  const month = m ? MONTHS.indexOf(m[2].toLowerCase()) : -1;
+  if (!m || month < 0) return null;
+  return `${DEMO_TODAY.slice(0, 4)}-${String(month + 1).padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+}
+
+// DESIGN.md day chips: one per day of the stay, today in teal. The approved expected discharge day
+// gets a dashed, half-filled chip with a home outline: "roughly here", not a promise. Tap a day to jump to it.
 export function DayStrip({ admitted, approvals }: { admitted: string; approvals: Approval[] }) {
+  const home = dischargeDay(approvals.at(-1)?.update.discharge);
   const start = Date.parse(`${admitted}T12:00:00Z`);
-  const end = Date.parse(`${DEMO_TODAY}T12:00:00Z`) + 3 * 86_400_000;
+  const minEnd = Date.parse(`${DEMO_TODAY}T12:00:00Z`) + 7 * 86_400_000;
+  const end = Math.max(minEnd, home ? Date.parse(`${home}T12:00:00Z`) + 2 * 86_400_000 : 0);
   const days: string[] = [];
   for (let t = start; t <= end; t += 86_400_000) days.push(new Date(t).toISOString().slice(0, 10));
   const withUpdate = new Set(approvals.map((a) => a.day));
+  const scroller = useHorizontalScroll();
 
   return (
-    <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
+    // Vertical padding inside the scroller so the chips' shadow isn't clipped.
+    <div
+      ref={scroller}
+      className="-mx-5 -my-3 flex cursor-grab gap-2 overflow-x-auto px-5 py-3 select-none [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
+    >
       {days.map((d) => {
         const date = new Date(`${d}T12:00:00Z`);
         const selected = d === DEMO_TODAY;
+        const isHome = d === home && !selected;
         return (
           <button
             key={d}
+            data-today={selected || undefined}
             onClick={() => document.getElementById(`day-${d}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            title={isHome ? "Expected home (estimate)" : undefined}
             className={cn(
               "flex h-[58px] w-[42px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-chip",
-              selected ? "bg-primary text-primary-foreground shadow-glow" : "bg-day text-muted-foreground",
+              selected && "bg-primary text-primary-foreground shadow-glow",
+              isHome && "border-2 border-dashed border-primary/60 bg-[linear-gradient(to_top,var(--primary-soft)_50%,var(--card)_50%)] text-primary-deep",
+              !selected && !isHome && "bg-day text-muted-foreground",
             )}
           >
             <span className="text-[11px] font-medium">{date.toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" })}</span>
-            <span className={cn("text-[15px] font-semibold", !selected && "text-foreground")}>{date.getUTCDate()}</span>
-            <span className={cn("size-1 rounded-full", withUpdate.has(d) ? (selected ? "bg-primary-foreground" : "bg-primary") : "bg-transparent")} />
+            <span className={cn("text-[15px] font-semibold", !selected && !isHome && "text-foreground")}>{date.getUTCDate()}</span>
+            {isHome ? (
+              <Home className="size-2.5" strokeWidth={2.5} />
+            ) : (
+              <span className={cn("size-1 rounded-full", withUpdate.has(d) ? (selected ? "bg-primary-foreground" : "bg-primary") : "bg-transparent")} />
+            )}
           </button>
         );
       })}
     </div>
   );
+}
+
+// Makes a row scrollable sideways on desktop too: mouse wheel → horizontal, click-and-drag,
+// and centers "today" when it first appears.
+function useHorizontalScroll() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const center = () => {
+      const today = el.querySelector<HTMLElement>("[data-today]");
+      if (!today) return;
+      const box = el.getBoundingClientRect();
+      const chip = today.getBoundingClientRect();
+      el.scrollLeft += chip.left + chip.width / 2 - (box.left + box.width / 2);
+    };
+    requestAnimationFrame(center); // after layout
+
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // trackpads already scroll sideways
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    };
+    let startX = 0;
+    let startLeft = 0;
+    let dragging = false;
+    let moved = false;
+    const onDown = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return; // touch scrolls natively
+      dragging = true;
+      moved = false;
+      startX = e.clientX;
+      startLeft = el.scrollLeft;
+    };
+    const onMove = (e: PointerEvent) => {
+      if (!dragging) return;
+      if (Math.abs(e.clientX - startX) > 4) moved = true;
+      el.scrollLeft = startLeft - (e.clientX - startX);
+    };
+    const onUp = () => (dragging = false);
+    // A drag should not count as a tap on a day.
+    const onClick = (e: MouseEvent) => {
+      if (moved) {
+        e.stopPropagation();
+        e.preventDefault();
+        moved = false;
+      }
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    el.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    el.addEventListener("click", onClick, true);
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      el.removeEventListener("click", onClick, true);
+    };
+  }, []);
+  return ref;
 }
