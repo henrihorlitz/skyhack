@@ -14,6 +14,8 @@ import { JUDGE_TRICK_LINE } from "@/data/notes";
 
 type Props = { patient: Patient; initialNote: string };
 
+const INTRO_MS = 3600; // minimum time the loading steps show on first open (4 steps × 0.9 s)
+
 export function ReviewScreen({ patient, initialNote }: Props) {
   const state = useDemoState(patient.id);
   const [note, setNote] = useState(initialNote);
@@ -21,6 +23,7 @@ export function ReviewScreen({ patient, initialNote }: Props) {
   const [draft, setDraft] = useState<FamilyUpdate | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [intro, setIntro] = useState(true); // first load: short, snappy loading steps
 
   async function load(forNote: string, fresh: boolean) {
     setLoading(true);
@@ -35,12 +38,17 @@ export function ReviewScreen({ patient, initialNote }: Props) {
     }
   }
 
-  // First draft: usually already prefetched by the ward overview, so this is instant.
+  // First draft: already prepared in the background (and cached on the server), so it's instant.
+  // For the demo we still show the loading steps briefly, so the audience sees what the AI does.
   useEffect(() => {
-    fetchDraft(patient.id, initialNote)
-      .then((res) => setDraft(res.update))
+    const shown = new Promise((r) => setTimeout(r, INTRO_MS));
+    Promise.all([fetchDraft(patient.id, initialNote), shown])
+      .then(([res]) => setDraft(res.update))
       .catch(() => toast.error("Couldn't prepare the draft. Please try again."))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setIntro(false);
+      });
   }, [patient.id, initialNote]);
 
   function addFinding() {
@@ -118,7 +126,7 @@ export function ReviewScreen({ patient, initialNote }: Props) {
           </div>
           <div className="rounded-card bg-card p-6 shadow-card">
             {loading || !draft ? (
-              <DraftLoading />
+              <DraftLoading stepMs={intro ? INTRO_MS / 4 : undefined} />
             ) : (
               <DraftEditor draft={draft} onChange={setDraft} pronoun={patient.pronoun} disabled={sending} />
             )}

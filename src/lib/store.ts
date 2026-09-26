@@ -135,3 +135,27 @@ export async function resetDemo() {
   if (a.error) throw a.error;
   if (q.error) throw q.error;
 }
+
+// Draft cache: an AI draft for a given patient + note is generated once and then served
+// instantly (also after reloads and in other windows). "Reset demo" keeps it on purpose.
+const draftMemory = new Map<string, FamilyUpdate>();
+
+export async function getCachedDraft(hash: string): Promise<FamilyUpdate | null> {
+  const db = getSupabase();
+  if (!db) return draftMemory.get(hash) ?? null;
+  const { data, error } = await db.from("drafts").select("update").eq("note_hash", hash).maybeSingle();
+  if (error) {
+    console.warn("[drafts] cache read failed:", error.message);
+    return null;
+  }
+  return (data?.update as FamilyUpdate | undefined) ?? null;
+}
+
+export async function cacheDraft(hash: string, patientId: string, update: FamilyUpdate) {
+  const db = getSupabase();
+  if (!db) return void draftMemory.set(hash, update);
+  const { error } = await db
+    .from("drafts")
+    .upsert({ note_hash: hash, patient_id: patientId, update, created_at: new Date().toISOString() });
+  if (error) console.warn("[drafts] cache write failed:", error.message);
+}

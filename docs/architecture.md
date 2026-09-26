@@ -42,7 +42,7 @@ flowchart LR
 
 ## Demo flow (what calls what)
 
-1. **Ward overview** (`/doctor`) prefetches today's drafts in the background (`fetchDraft` in `src/lib/client.ts`), like a daily job would.
+1. **Start page and ward overview** prepare today's drafts in the background (`DraftWarmup`), like a daily job would. `/api/draft` caches live drafts in the `drafts` table, so the review screen opens instantly; it still shows the loading steps for ~3.6 s so the audience sees what the AI does.
 2. **Review** (`/doctor/maria`): `/api/draft` → `generateDraft()` sends the chart note + its numbered PLAN items to Claude. Claude returns `today`/`next` lists, `withheld` items and a `planSkipped` list. The server checks that **every plan item** is covered, retries once if not, and falls back to a prepared draft if the AI fails.
 3. Doctor toggles/edits items → **Approve update** → `/api/approve` writes to `approvals` (only switched-on items).
 4. **Family app** polls `/api/state` every 2 s. A new approval → iOS-style **push notification** on the lock screen 1.5 s later → tap → timeline with the new day highlighted.
@@ -73,6 +73,7 @@ flowchart LR
 |---|---|---|
 | `approvals` | `patient_id`, `day`, `update` (jsonb `FamilyUpdate`), `approved_by`, `approved_at` | Today's approvals. Past days come from seed data |
 | `questions` | `patient_id`, `question`, `asked_by`, `callback_slot`, `created_at` | Logged by chat or call |
+| `drafts` | `note_hash` (sha256 of patient + note), `patient_id`, `update`, `created_at` | Cache of live AI drafts: a note is drafted once, then served instantly. "Reset demo" keeps it; "Regenerate" bypasses it |
 
 RLS is on with **open demo policies** (anon can read/insert/delete). Fine for synthetic data, not for production.
 
@@ -81,7 +82,7 @@ RLS is on with **open demo policies** (anon can read/insert/delete). Fine for sy
 1. **Drafts:** plan-coverage check + one retry; AI failure → prepared draft for that patient (incl. the judge-trick variant).
 2. **Chat:** AI failure → `offlineAnswer()` from approved data; medical questions still reach the doctor.
 3. **Call:** mic denied or ElevenLabs unreachable → "Call failed, please use the chat".
-4. **Prefetch:** the ward overview prepares drafts, so the review screen opens instantly.
+4. **Draft cache:** drafts are generated once per note and stored in Supabase, so the review screen opens instantly even after reloads.
 5. **Reset:** "Reset demo" on the start page clears today's approvals and questions.
 6. **Pre-demo check:** `/status` green on the live URL; run the demo once to warm up.
 
@@ -139,7 +140,7 @@ bun run build                # must pass before pushing
 - **`ANTHROPIC_BASE_URL` in Claude Code's shell** would redirect the SDK; `getClient()` pins the base URL.
 - **Empty env vars** (`FOO=`) count as unset: use `||`, not `??`, for defaults.
 - **The browser pane in the Claude desktop app blocks the microphone**: test calls in Chrome.
-- **Opening a patient directly** (not via the ward overview) takes 10–20 s for the first draft.
+- **The very first draft for a note** takes 10–20 s; after that it's cached. Open the start page once before the demo to warm it up.
 - **Vercel deployment protection:** generated `*-henri-horlitz.vercel.app` URLs require a login. Share only `mindpeace-health.vercel.app`.
 - **Supabase connector is account-wide:** only touch `qwuswyylymbwzdrqhjpk`.
 - **Next.js 16** differs from older versions: check `node_modules/next/dist/docs/` (see `AGENTS.md`).

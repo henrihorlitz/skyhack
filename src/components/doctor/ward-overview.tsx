@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 import { ChevronRight, CircleCheck, FileText, MessageCircleQuestion } from "lucide-react";
-import { fetchDraft, isToday, timeLabel, useDemoState } from "@/lib/client";
+import { isToday, timeLabel, useDemoState } from "@/lib/client";
+import { DraftWarmup } from "@/components/draft-warmup";
 import { HOSPITAL, OTHER_BEDS, PATIENTS } from "@/data/seed";
-import { TODAY_NOTES } from "@/data/notes";
 import { cn } from "@/lib/utils";
 
 type Row =
@@ -15,10 +14,6 @@ type Row =
 export function WardOverview() {
   const state = useDemoState();
 
-  // Drafts are prepared in the background, like the daily job would do, so review opens instantly.
-  useEffect(() => {
-    for (const p of PATIENTS) fetchDraft(p.id, TODAY_NOTES[p.id]).catch(() => {});
-  }, []);
 
   const rows: Row[] = [
     ...PATIENTS.map((p) => {
@@ -45,6 +40,7 @@ export function WardOverview() {
 
   return (
     <main className="mx-auto w-full max-w-[1120px] flex-1 px-6 pt-6 pb-4">
+      <DraftWarmup />
       <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
         <div>
           <p className="font-medium text-subtitle">Saturday 26 September</p>

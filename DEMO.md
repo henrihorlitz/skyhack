@@ -62,7 +62,7 @@ Rehearse with a timer. If you run long, cut words in "Why it works", never demo 
 
 **If something fails on stage**
 - Call doesn't connect (mic/network) → close it, tap the **chat** button, type the same questions. The loop still closes.
-- Draft is slow → keep talking over the loading steps. If the AI is down, a prepared draft appears automatically once the request times out.
+- Draft is slow (only on the very first run of a note) → keep talking over the loading steps. If the AI is down, a prepared draft appears automatically once the request times out.
 - Anything stuck → start page → **Reset demo** → start again from the ward overview.
 
 ## Honest answers ready
@@ -79,7 +79,7 @@ Rehearse with a timer. If you run long, cut words in "Why it works", never demo 
 
 - [ ] `/status` all green on the live URL
 - [ ] Start page → **Reset demo**
-- [ ] Doctor window on `/doctor`, **wait 15 s** (drafts prepare in the background). Don't open Maria before the demo.
+- [ ] Doctor window on `/doctor` (drafts are cached on the server after the first run; opening Maria shows the loading steps for ~4 s, then the draft)
 - [ ] Family window narrow (~390 px), on `/family/maria` (lock screen). Chrome, microphone allowed for the site (do one test call beforehand)
 - [ ] One full run-through 10 min before, then **Reset demo** again
 - [ ] Browser zoom checked on the projector, other tabs closed, notifications off (Focus mode)

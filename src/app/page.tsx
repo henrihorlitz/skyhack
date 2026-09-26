@@ -3,6 +3,7 @@ import { Smartphone, Stethoscope } from "lucide-react";
 import { Logo } from "@/components/brand";
 import { ResetButton } from "@/components/reset-button";
 import { DemoFooter } from "@/components/doctor/top-bar";
+import { DraftWarmup } from "@/components/draft-warmup";
 
 // Demo launcher: open the doctor view and the family app in two browser windows.
 export default function Home() {
@@ -27,6 +28,7 @@ export default function Home() {
       </div>
     </main>
     <DemoFooter />
+    <DraftWarmup />
     </>
   );
 }

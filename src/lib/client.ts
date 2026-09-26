@@ -37,7 +37,7 @@ export function fetchDraft(patientId: string, note: string, fresh = false) {
     const p = fetch("/api/draft", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ patientId, note }),
+      body: JSON.stringify({ patientId, note, fresh }),
     }).then(async (res) => {
       if (!res.ok) throw new Error("draft failed");
       return res.json();

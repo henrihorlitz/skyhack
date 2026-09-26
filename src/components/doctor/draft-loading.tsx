@@ -14,12 +14,12 @@ const STEP_MS = 2200;
 
 // Shown while the AI drafts: tells the story of what the filter is doing.
 // The active step fills with teal from left to right over its duration (.fill-sweep in globals.css).
-export function DraftLoading() {
+export function DraftLoading({ stepMs = STEP_MS }: { stepMs?: number }) {
   const [step, setStep] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), STEP_MS);
+    const id = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), stepMs);
     return () => clearInterval(id);
-  }, []);
+  }, [stepMs]);
   return (
     <div className="flex min-h-[420px] flex-col items-center justify-center gap-5 px-2 text-center">
       <Sparkles className="size-6 animate-pulse text-primary" />
@@ -41,7 +41,7 @@ export function DraftLoading() {
                 i === step && "fill-sweep font-semibold",
                 i > step && "text-muted-foreground/45",
               )}
-              style={i === step ? { animationDuration: `${STEP_MS}ms` } : undefined}
+              style={i === step ? { animationDuration: `${stepMs}ms` } : undefined}
             >
               {s}
             </span>
