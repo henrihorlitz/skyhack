@@ -8,7 +8,8 @@ Tracks: **Healthcare** and **AI Agents**. Partners on the website: Cursor, Supab
 (ElevenLabs is not listed on the site; check at kickoff whether there is a voice prize).
 
 **Schedule (latest agenda):** 08:00 breakfast · 08:30 hacking starts + team formation · 10:00 break · 12:30 lunch · **17:15 code freeze & submission** · 17:30–18:30 technical reviewers at the tables · 18:45 finalists present to the final jury · 20:00 awards.
-Have the submission ready **before 17:00**: live Vercel URL, repo link, a short description, and the demo must run without us touching code.
+**Submission = code only** (no slides, no video). Have it ready **before 17:00**, and the demo must run without us touching code.
+**Final pitch: 5 minutes total, including the live demo.** Script in `DEMO.md`.
 Team max. 3 people.
 
 ## Judging criteria (optimize for these, details in `docs/judging-criteria.md`)
@@ -64,8 +65,8 @@ Domain facts from a nurse (note structure, what nurses may say, call volume): `d
 6. **Verify before saying done:** run `bun run build` and check the page in the browser.
 7. **Commit + push after every working step** (Vercel auto-deploys from `main`).
 8. Henri is a beginner dev: explain choices in one plain sentence, ask when there's a trade-off.
-9. **After 14:45: feature freeze.** Only polish, copy, demo data, fallbacks, and bug fixes. Code freeze is 17:15. Day plan: `DEMO.md`.
-10. **Build with theme tokens, not hard-coded colors** (Tailwind/shadcn CSS variables in `globals.css`), so Henri's design system can be dropped in later by swapping variables.
+9. **After 15:15: feature freeze.** Only polish, copy, demo data, fallbacks, and bug fixes. Code freeze is 17:15. Day plan: `DEMO.md`.
+10. **Build with theme tokens, not hard-coded colors** (Tailwind/shadcn CSS variables in `globals.css`), so Henri's design system can be dropped in later by swapping variables. Henri delivers it as `DESIGN.md` with token variables (Google format).
 11. **Headless self-testing:** use the existing `browse` / `qa` skills (gstack). Don't install Playwright.
 12. **Keep the docs true.** When you add or change a route, table, agent tool, env var or service, update `docs/architecture.md` (incl. the status column) in the same commit. Technical reviewers read it. Non-obvious choices go in `docs/decisions/`.
 

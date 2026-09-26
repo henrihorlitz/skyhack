@@ -4,23 +4,26 @@
 
 ## Timeline for the day
 
-**Workflow:** plan everything first → Claude builds while Henri makes the design system and logo → Claude tests headless → Henri tests → apply the design system → 3h pitch → 1h practice.
+**Workflow:** plan everything first → Claude builds while Henri makes the design system and logo → Claude tests headless → Henri tests → apply the design system → 2.5h pitch → 1h practice.
+**Submission is code only** (no slides/video). **Final pitch = 5 minutes including the live demo.**
 
 | Time | Claude | Henri |
 |---|---|---|
 | 09:50–10:45 | Planning together: UX, user flows, feature list, seed data outline → `docs/plan.md` | same |
-| 10:45–13:00 | **Build** the full demo path (doctor view, family timeline, voice agent, approve → live update), default shadcn style with theme tokens | **Design system + logo**: colors, font, radius, logo SVG. Deliver as tokens so the swap is easy. 12:30 lunch |
-| 13:00–13:30 | **Self-test headless** (gstack `browse`/`qa`): click the whole demo path, fix bugs | lunch / finish design |
-| 13:30–14:00 | Fix bugs from Henri's test | **Test** on laptop + phone, write a bug list |
-| 14:00–14:45 | **Apply the design system** + logo, final fixes, deploy | review the look |
-| **14:45** | **Feature freeze** | |
-| 14:45–17:45 | Only fixes, polish, fallbacks (record real AI answers), README, 60s backup video | **Pitch (3h):** script, slides, numbers, Q&A answers |
-| **17:00** | **Submit** (live URL, repo, description). Hard deadline 17:15 | |
+| 10:45–13:30 | **Build** the full demo path (doctor view, family timeline, voice agent, approve → live update), default shadcn style with theme tokens | **Design system + logo** → `DESIGN.md` with token variables + logo SVG. 12:30 lunch |
+| 13:30–14:00 | **Self-test headless** (gstack `browse`/`qa`): click the whole demo path, fix bugs | finish design |
+| 14:00–14:30 | Fix bugs from Henri's test | **Test** on laptop + phone, write a bug list |
+| 14:30–15:15 | **Apply the design system** + logo, final fixes, deploy | review the look |
+| **15:15** | **Feature freeze** | |
+| 15:15–17:45 | Only fixes, polish, fallbacks (record real AI answers), README, optional backup video for us | **Pitch (2.5h):** script, slides, numbers, Q&A answers |
+| **17:00** | **Submit the code** (live URL + repo). Hard deadline 17:15 | |
 | 17:15 | **Code freeze.** Don't touch code anymore | |
 | 17:30–18:30 | Technical reviewers at our table: every visit = a live demo rehearsal | |
-| 17:45–18:45 | | **Practice (1h):** full pitch + demo, 3–5 runs, timed |
+| 17:45–18:45 | | **Practice (1h):** full 5-min pitch + demo, 3–5 runs, timed |
 | 18:45 | Finalists pitch to the final jury | |
 | 20:00 | Awards | |
+
+If the build runs late, we take time from the pitch block (decide at 13:30).
 
 ## One sentence
 
@@ -35,13 +38,17 @@ For **families of hospitalized patients in Portugal**, who **can only reach a do
 - Pitch line: *"On my girlfriend's ward in Lisbon: 22 families, 3 doctors, one phone hour."*
 - Show it as a recurring operational problem, not a per-family statistic.
 
-## 90-second demo script
+## 5-minute pitch (including live demo), draft
 
-1. **Hook (15s):** A concrete person. "Meet [name], [situation]. Today, [what goes wrong]."
-2. **Demo (60s):** [step A] → [step B] → **aha moment [C]**. Offer a judge to type something in.
-3. **Why now / what's next (15s):** [agents + voice make this possible now], [next step].
+| Time | Part | Content |
+|---|---|---|
+| 0:00–0:45 | **Hook + problem** | Girlfriend is a nurse in Lisbon. "On her ward: 22 families, 3 doctors, one phone hour." Nurses aren't allowed to say more than "stable". |
+| 0:45–3:15 | **Live demo** | Doctor approves the filtered note (aha #1: the AI knows what not to say) → family timeline updates live → voice call, the agent declines "Does she have cancer?" and logs it → question appears in the doctor's queue (aha #2) |
+| 3:15–4:00 | **Why it works** | "We encoded the rules nurses already follow." Doctor stays in control, nothing leaves without approval. |
+| 4:00–4:40 | **Business + vision** | The hospital pays, free for families. FHIR integration, after-discharge follow-up calls. |
+| 4:40–5:00 | **Close** | One memorable line + the name. |
 
-Rule of thumb: ~30% problem, ~70% solution.
+The demo gets about half the time. Rehearse with a timer, and cut words, not demo steps.
 
 ## Honest answers ready
 
