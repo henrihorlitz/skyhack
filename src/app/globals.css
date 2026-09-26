@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -39,6 +39,14 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-nursing: var(--nursing);
+  --color-nursing-soft: var(--nursing-soft);
+  --color-medical: var(--medical);
+  --color-medical-soft: var(--medical-soft);
+  --color-withheld: var(--withheld);
+  --color-withheld-soft: var(--withheld-soft);
+  --color-internal: var(--internal);
+  --color-internal-soft: var(--internal-soft);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -81,6 +89,16 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* MindPeace scope colors: green = a nurse may say it, amber = needs doctor approval,
+     rose = withheld from family, slate = internal care-team instruction. */
+  --nursing: oklch(0.55 0.13 155);
+  --nursing-soft: oklch(0.96 0.04 155);
+  --medical: oklch(0.62 0.14 70);
+  --medical-soft: oklch(0.97 0.05 85);
+  --withheld: oklch(0.58 0.17 15);
+  --withheld-soft: oklch(0.97 0.025 15);
+  --internal: oklch(0.5 0.02 260);
+  --internal-soft: oklch(0.96 0.005 260);
 }
 
 .dark {
