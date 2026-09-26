@@ -34,4 +34,6 @@ Questions like these are directed to the medical team.
 - Illustrative example: a **22-bed ward** means ~22 families trying to reach the medical team, mostly during the **12:00–13:00** phone window, with only **~3 doctors** covering those patients.
 - Some relatives call once, others 2, 3 or up to ~10 times when they can't get through.
 
+**Confirmed by Henri:** these are the real current numbers from her ward, and they're considered representative of the Portuguese public health system. We can say them in the pitch as "on one Lisbon ward".
+
 **Pitch guidance (from the nurse):** don't claim "10 calls per family per day" as a statistic. Present repeated unanswered calls as a recurring operational problem, with this ward as an illustrative example.

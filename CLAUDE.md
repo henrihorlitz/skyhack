@@ -30,6 +30,14 @@ Domain facts from a nurse (note structure, what nurses may say, call volume): `d
   2. **Family app (mobile):** a notification with the plain-language status ("Stable · CT tomorrow · expected discharge Friday") and a treatment timeline.
   3. **Live voice call:** family asks "When can I visit?" → it answers. Then asks "Does she have cancer?" → the agent declines, logs the question for the doctor and books a callback slot.
   4. **Back to the doctor view:** the question shows up in the doctor's queue. **Aha #2: the loop closes, so the doctor gets one list instead of 15 phone calls.**
+- **Filter rules (from the real nurse vs. doctor boundary, see `docs/research/nurse-input.md`):**
+  - 🟢 **Nursing scope, auto-shareable:** stable, awake and responsive, vitals stable, ate well, obvious changes in condition.
+  - 🟡 **Medical scope, needs doctor approval:** diagnoses, exam and imaging findings, lab results and their interpretation, the plan.
+  - ⚫ **Internal, never shared:** instructions to the nursing team (draw blood, IV fluids, meds).
+  - Pitch line: *"We didn't invent the rules. We encoded the rules nurses already follow."*
+- **Seed chart notes** follow the real structure: Problems (active/resolved) → Findings (labs, exams) → Plan for tomorrow (incl. nursing instructions).
+  The family view mirrors it in three sections: *Why she's here* / *How today went* / *What's next*.
+- **Impact numbers (real, from the nurse's Lisbon ward, representative of Portugal):** 22 beds, ~3 doctors, 1 phone hour (12:00–13:00). Details in `DEMO.md`.
 - **Agent tools:** `get_approved_update`, `log_question_for_doctor`, `book_callback_slot`. Answers only from approved content, multilingual (PT/EN/DE).
 - **Real:** the note → filtered briefing (Claude), the approval flow, the family status view, the voice agent with tools.
 - **Faked:** EHR integration (seeded chart notes for 2–3 synthetic patients), login/relative verification, push notifications, the callback calendar.
