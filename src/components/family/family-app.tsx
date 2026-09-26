@@ -5,6 +5,7 @@ import { MessageCircle, Phone } from "lucide-react";
 import { Logo } from "@/components/brand";
 import { DayStrip, Timeline } from "@/components/family/timeline";
 import { ChatAgent } from "@/components/family/chat-agent";
+import { CareTeam } from "@/components/family/care-team";
 import { CallScreen } from "@/components/family/call-screen";
 import { isToday, relativeDay, timeLabel } from "@/lib/client";
 import { DEMO_USER, HOSPITAL } from "@/data/seed";
@@ -73,6 +74,8 @@ export function FamilyApp({ patient, approvals, freshDay }: Props) {
           <h2 className="mb-4 text-sm font-semibold text-section">{patient.firstName}&apos;s journey</h2>
           <Timeline approvals={approvals} doctor={DEMO_USER.shortName} freshDay={freshDay} />
         </section>
+
+        <CareTeam patient={patient} onAsk={() => setMode("chat")} />
       </main>
 
       <div className="fixed right-5 bottom-6 flex flex-col items-end gap-3">

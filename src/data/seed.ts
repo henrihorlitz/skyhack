@@ -18,6 +18,11 @@ export const DEMO_USER = {
   shortName: "Dr. Silva",
   role: "Internal Medicine",
   avatar: "IS",
+  // Drop a portrait at public/brand/doctor.png (transparent background works best). Falls back to initials.
+  photo: "/brand/doctor.png",
+  title: "Internal medicine physician",
+  experience: "14 years at São Rafael",
+  languages: "PT · EN · ES",
 };
 
 export const WARD_INFO = {
