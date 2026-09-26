@@ -41,7 +41,7 @@ export function CareTeam({ patient, onAsk }: { patient: Patient; onAsk: () => vo
         ))}
       </ul>
 
-      <Button variant="outline" size="lg" className="mt-4 w-full" onClick={onAsk}>
+      <Button variant="secondary" size="lg" className="mt-4 w-full bg-primary-soft text-primary-deep ring-1 ring-primary/30 hover:bg-primary/15" onClick={onAsk}>
         <MessageCircle /> Ask {DEMO_USER.shortName} a question
       </Button>
     </section>
