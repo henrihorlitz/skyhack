@@ -10,7 +10,9 @@ export async function POST(req: Request) {
   if (!body.patientId || !getPatient(body.patientId) || !parsed.success) {
     return Response.json({ error: "valid patientId and update required" }, { status: 400 });
   }
-  const update = { ...parsed.data, items: parsed.data.items.filter((i) => i.include) };
+  // Only what the doctor left switched on reaches the family.
+  const d = parsed.data;
+  const update = { ...d, items: d.items.filter((i) => i.include), discharge: d.dischargeShared ? d.discharge : null };
   await addApproval({
     patientId: body.patientId,
     day: DEMO_TODAY,

@@ -34,15 +34,30 @@ export function DraftEditor({ draft, onChange, pronoun, disabled }: Props) {
         ))}
       </Block>
 
-      <Block title="Expected discharge" badge={<ScopeBadge kind="medical" />}>
-        <div className="flex items-start gap-2">
-          <Home className="mt-0.5 size-4 shrink-0 text-primary" />
-          {draft.discharge ? (
-            <Editable value={draft.discharge} disabled={disabled} onSave={(discharge) => onChange({ ...draft, discharge })} />
-          ) : (
-            <p className="text-sm font-medium text-subtitle">No date in the note, so the family sees &quot;Not estimated yet&quot;.</p>
-          )}
-        </div>
+      <Block title="Expected discharge" badge={draft.discharge && draft.dischargeShared ? <ScopeBadge kind="medical" /> : undefined}>
+        {draft.discharge ? (
+          <div className={cn("flex items-start gap-3 rounded-row bg-row p-3.5 transition-opacity", !draft.dischargeShared && "opacity-45")}>
+            <Toggle
+              checked={draft.dischargeShared}
+              disabled={disabled}
+              onChange={(dischargeShared) => onChange({ ...draft, dischargeShared })}
+            />
+            <Home className="mt-0.5 size-4 shrink-0 text-primary" />
+            <div className="min-w-0 flex-1">
+              <Editable
+                value={draft.discharge}
+                disabled={disabled || !draft.dischargeShared}
+                onSave={(discharge) => onChange({ ...draft, discharge })}
+              />
+            </div>
+            {!draft.dischargeShared && <EyeOff className="size-4 text-muted-foreground" />}
+          </div>
+        ) : (
+          <div className="flex items-start gap-2">
+            <Home className="mt-0.5 size-4 shrink-0 text-primary" />
+            <p className="text-sm font-medium text-subtitle">No date in the note, so the family sees &quot;No date yet&quot;.</p>
+          </div>
+        )}
       </Block>
 
       <div className="rounded-[20px] bg-coral-soft p-4">

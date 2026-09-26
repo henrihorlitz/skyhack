@@ -38,7 +38,7 @@ export function Timeline({ approvals, doctor, freshDay }: Props) {
         {latest.update.discharge ? (
           <p className="font-semibold">{latest.update.discharge}</p>
         ) : (
-          <p className="text-[15px] font-medium text-subtitle">Not estimated yet. {doctor} will update you.</p>
+          <p className="text-[15px] font-medium text-subtitle">No date yet. {doctor} will update you.</p>
         )}
       </Node>
     </ol>

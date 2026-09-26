@@ -29,6 +29,8 @@ export const familyUpdateSchema = z.object({
   items: z.array(updateItemSchema),
   // null = no date in the note. The AI must never invent one.
   discharge: z.string().nullable(),
+  // The doctor can hold the date back; then the family sees "No date yet".
+  dischargeShared: z.boolean().default(true),
   withheld: z.array(withheldSchema),
 });
 

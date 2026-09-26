@@ -99,10 +99,15 @@ export const CALLBACK_SLOTS = [
   "Mon 28 Sep, 12:00",
 ];
 
-const approved = (patientId: string, day: string, time: string, update: Approval["update"]): Approval => ({
+const approved = (
+  patientId: string,
+  day: string,
+  time: string,
+  update: Omit<Approval["update"], "dischargeShared">,
+): Approval => ({
   patientId,
   day,
-  update,
+  update: { ...update, dischargeShared: true },
   approvedBy: DEMO_USER.name,
   approvedAt: `${day}T${time}:00+01:00`,
 });
