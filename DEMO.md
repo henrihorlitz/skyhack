@@ -23,6 +23,7 @@
 | 18:45 | Finalists pitch to the final jury | |
 | 20:00 | Awards | |
 
+**The times are upper limits, not appointments.** If a block finishes early, move straight on to the next one.
 If the build runs late, we take time from the pitch block (decide at 13:30).
 
 ## One sentence
