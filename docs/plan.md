@@ -24,7 +24,18 @@ Decisions from the planning session. Big picture and rules: `CLAUDE.md`. Demo sc
 
 ## 2. Family flow (mobile)
 
-_To plan next._
+### Demo setup
+- **Two browser windows on one laptop:** doctor view (wide) + family app (a narrow browser window, no phone frame). Both on the projector.
+- So the family app must be a real mobile layout, designed for ~390px width.
+- **Shared state lives in Supabase** (approved updates, questions, callbacks). The two windows are separate clients, and Vercel functions don't share memory.
+- The family app **polls every 2s**, which is simpler than realtime and looks just as live.
+
+### Screen (single page)
+1. Header: logo, patient name + age, status pill ("🟢 Stable · updated 14:32 · approved by Dr. Silva").
+2. *Why she's here* (plain language).
+3. Timeline: past days (one line each, **tap to expand** the full approved update) → **today highlighted** → upcoming (e.g. "Tomorrow: chest CT") → 🏠 **Expected home: ~Friday** (or "Not estimated yet").
+   - After the doctor approves, the new node appears live.
+4. Sticky button **📞 Ask about Maria** → starts the voice agent (browser microphone).
 
 ## 3. Voice agent
 
