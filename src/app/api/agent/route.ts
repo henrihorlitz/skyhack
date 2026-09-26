@@ -1,6 +1,6 @@
 import { getClient, hasAiKey, MODEL, textOf } from "@/lib/ai";
 import { makeAgentTools, type AgentEvent } from "@/lib/agent-tools";
-import { findFallback } from "@/data/fallbacks";
+import { offlineAnswer } from "@/lib/offline-agent";
 import { DEMO_USER, getPatient } from "@/data/seed";
 
 // AI calls can take 5-20s; give them room on Vercel.
@@ -32,11 +32,12 @@ export async function POST(req: Request) {
   const patient = getPatient(patientId);
   const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content;
   if (!patient || !lastUser) return Response.json({ error: "patientId and messages required" }, { status: 400 });
+  const events: AgentEvent[] = [];
   if (!hasAiKey()) {
-    return Response.json({ text: findFallback(lastUser), events: [], source: "fallback" });
+    const text = await offlineAnswer(patientId, caller, lastUser, events);
+    return Response.json({ text, events, source: "fallback" });
   }
 
-  const events: AgentEvent[] = [];
   try {
     const runner = getClient().beta.messages.toolRunner({
       model: MODEL,
@@ -52,6 +53,10 @@ export async function POST(req: Request) {
     return Response.json({ text: last ? textOf(last.content) : "", events, source: "live" });
   } catch (err) {
     console.error("[agent] falling back:", err);
-    return Response.json({ text: findFallback(lastUser), events, source: "fallback", error: String(err) });
+    // Don't log the same question twice if the live agent already passed it on before failing.
+    const text = events.some((e) => e.tool === "log_question_for_doctor")
+      ? `I've passed your question to ${DEMO_USER.shortName}. She'll call you in the daily phone hour.`
+      : await offlineAnswer(patientId, caller, lastUser, events);
+    return Response.json({ text, events, source: "fallback", error: String(err) });
   }
 }
