@@ -1,4 +1,4 @@
-import { hasAnthropicKey, MODEL } from "@/lib/ai";
+import { hasAiKey, MODEL, PROVIDER } from "@/lib/ai";
 import { getSupabase, hasSupabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ export default async function StatusPage() {
   const [dbOk, dbMsg] = hasSupabase() ? await checkSupabase() : [false, "env vars missing"];
   const hasEleven = Boolean(process.env.ELEVENLABS_API_KEY);
   const checks: [string, boolean, string][] = [
-    ["Anthropic API key", hasAnthropicKey(), hasAnthropicKey() ? `model: ${MODEL}` : "missing → AI uses fallbacks"],
+    ["AI key", hasAiKey(), hasAiKey() ? `${PROVIDER} · ${MODEL}` : "missing → AI uses fallbacks"],
     ["ElevenLabs API key", hasEleven, hasEleven ? "ok" : "missing → browser voice"],
     ["Supabase", dbOk, dbMsg],
     ["Deployment", true, process.env.VERCEL_URL || "local"],

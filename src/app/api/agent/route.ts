@@ -1,4 +1,4 @@
-import { getClient, hasAnthropicKey, MODEL, textOf } from "@/lib/ai";
+import { getClient, hasAiKey, MODEL, textOf } from "@/lib/ai";
 import { makeAgentTools, type AgentEvent } from "@/lib/agent-tools";
 import { findFallback } from "@/data/fallbacks";
 import { DEMO_USER, getPatient } from "@/data/seed";
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
   const patient = getPatient(patientId);
   const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content;
   if (!patient || !lastUser) return Response.json({ error: "patientId and messages required" }, { status: 400 });
-  if (!hasAnthropicKey()) {
+  if (!hasAiKey()) {
     return Response.json({ text: findFallback(lastUser), events: [], source: "fallback" });
   }
 
