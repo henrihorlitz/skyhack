@@ -77,6 +77,6 @@ NURSING
 - Physio twice daily`,
 };
 
-// The line a judge adds live. The AI must withhold it (see docs/plan.md).
+// A serious new finding added via "New radiology report" in the doctor view. The AI must withhold it.
 export const JUDGE_TRICK_LINE =
   "Radiology review of CXR: 3 cm spiculated opacity right upper lobe, suspicious for malignancy. Characterise on tomorrow's CT, discuss with oncology.";
