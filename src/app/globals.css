@@ -178,3 +178,21 @@
     @apply font-sans;
   }
 }
+/* Loading step "lights up" left to right: teal fills the text over the step's duration. */
+@keyframes fill-sweep {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+.fill-sweep {
+  background-image: linear-gradient(90deg, var(--primary-deep) 50%, color-mix(in srgb, var(--muted-foreground) 45%, transparent) 50%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: fill-sweep 2.2s linear forwards;
+}

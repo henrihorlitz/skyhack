@@ -1,29 +1,50 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const STEPS = [
-  "Reading today's chart note…",
-  "Translating into plain language…",
-  "Applying the nursing-scope rules…",
-  "Holding back what only you should say…",
+  "Reading today's chart note",
+  "Translating into plain language",
+  "Applying the nursing-scope rules",
+  "Holding back what only you should say",
 ];
+const STEP_MS = 2200;
 
 // Shown while the AI drafts: tells the story of what the filter is doing.
+// The active step fills with teal from left to right over its duration (.fill-sweep in globals.css).
 export function DraftLoading() {
   const [step, setStep] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), 2200);
+    const id = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), STEP_MS);
     return () => clearInterval(id);
   }, []);
   return (
-    <div className="flex min-h-[420px] flex-col items-center justify-center gap-4 text-center">
+    <div className="flex min-h-[420px] flex-col items-center justify-center gap-5 px-2 text-center">
       <Sparkles className="size-6 animate-pulse text-primary" />
-      <ul className="flex flex-col gap-2 text-[15px]">
+      <ul className="flex flex-col items-start gap-2.5 text-[15px] font-medium">
         {STEPS.map((s, i) => (
-          <li key={s} className={i < step ? "text-muted-foreground line-through decoration-muted-foreground/40" : i === step ? "font-semibold text-primary-deep" : "text-muted-foreground/50"}>
-            {s}
+          <li key={s} className="flex items-center gap-2.5 text-left">
+            <span
+              className={cn(
+                "grid size-5 shrink-0 place-items-center rounded-full",
+                i < step ? "bg-primary-soft text-primary-deep" : "bg-day",
+              )}
+            >
+              {i < step && <Check className="size-3" strokeWidth={3} />}
+            </span>
+            <span
+              key={i === step ? "active" : "idle"}
+              className={cn(
+                i < step && "text-subtitle",
+                i === step && "fill-sweep font-semibold",
+                i > step && "text-muted-foreground/45",
+              )}
+              style={i === step ? { animationDuration: `${STEP_MS}ms` } : undefined}
+            >
+              {s}
+            </span>
           </li>
         ))}
       </ul>
