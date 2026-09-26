@@ -15,9 +15,8 @@ export function TopBar() {
           </span>
         </div>
         <div className="flex items-center gap-2.5 text-sm">
-          <span className="grid size-9 place-items-center rounded-full bg-primary-soft text-[13px] font-semibold text-primary-deep">
-            {DEMO_USER.avatar}
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element -- small static avatar */}
+          <img src={DEMO_USER.photo} alt="" className="size-9 rounded-full bg-primary-soft object-cover object-top" />
           <span className="hidden font-medium sm:inline">{DEMO_USER.name}</span>
         </div>
       </div>

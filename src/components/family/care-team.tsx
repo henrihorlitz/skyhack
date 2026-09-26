@@ -48,16 +48,16 @@ export function CareTeam({ patient, onAsk }: { patient: Patient; onAsk: () => vo
   );
 }
 
-// Portrait on a soft teal circle (like the reference). Shows initials until a photo exists.
+// Portrait on a soft teal circle, head slightly above it (like the reference). Initials until a photo exists.
 function Portrait() {
   const [failed, setFailed] = useState(false);
   return (
-    <div className="relative size-24 shrink-0">
-      <span className="absolute inset-x-1 bottom-0 top-3 rounded-full bg-primary-soft" />
-      <span className="absolute right-0 bottom-3 size-10 rounded-full bg-primary/15" />
-      <div className="absolute inset-x-1 bottom-0 top-3 overflow-hidden rounded-b-full">
+    <div className="relative mt-3 size-28 shrink-0">
+      <span className="absolute inset-0 rounded-full bg-primary-soft" />
+      <span className="absolute -right-1 bottom-2 size-9 rounded-full bg-primary/15" />
+      <div className="absolute inset-x-0 -top-5 bottom-0 overflow-hidden rounded-b-full">
         {failed ? (
-          <span className="grid size-full place-items-center text-2xl font-semibold text-primary-deep">
+          <span className="grid size-full place-items-center pt-5 text-2xl font-semibold text-primary-deep">
             {DEMO_USER.avatar}
           </span>
         ) : (
@@ -66,7 +66,7 @@ function Portrait() {
             src={DEMO_USER.photo}
             alt={DEMO_USER.name}
             onError={() => setFailed(true)}
-            className="absolute bottom-0 left-1/2 h-[118%] max-w-none -translate-x-1/2 object-contain object-bottom"
+            className="absolute bottom-0 left-1/2 w-[112%] max-w-none -translate-x-1/2"
           />
         )}
       </div>
