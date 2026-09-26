@@ -21,7 +21,7 @@ export default async function StatusPage() {
     ["Anthropic API key", hasAnthropicKey(), hasAnthropicKey() ? `model: ${MODEL}` : "missing → AI uses fallbacks"],
     ["ElevenLabs API key", hasEleven, hasEleven ? "ok" : "missing → browser voice"],
     ["Supabase", dbOk, dbMsg],
-    ["Deployment", true, process.env.VERCEL_URL ?? "local"],
+    ["Deployment", true, process.env.VERCEL_URL || "local"],
   ];
 
   return (

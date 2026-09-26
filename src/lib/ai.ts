@@ -4,10 +4,10 @@ import { findFallback } from "@/data/fallbacks";
 // Demo safety net: every AI call returns *something*. If the key is missing,
 // the venue WiFi dies or the API is slow, we serve a cached answer instead.
 
-export const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-opus-5";
+export const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-5";
 // Lower effort = faster answers on stage. Raise to "high" for harder tasks.
-const EFFORT = (process.env.ANTHROPIC_EFFORT ?? "medium") as "low" | "medium" | "high";
-const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS ?? 25_000);
+const EFFORT = (process.env.ANTHROPIC_EFFORT || "medium") as "low" | "medium" | "high";
+const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 25_000);
 
 export type AiResult = { text: string; source: "live" | "fallback"; error?: string };
 
@@ -16,7 +16,9 @@ export function hasAnthropicKey() {
 }
 
 export function getClient() {
-  return new Anthropic({ timeout: TIMEOUT_MS, maxRetries: 1 });
+  // Explicit baseURL: Claude Code sets ANTHROPIC_BASE_URL in its own shell, which the SDK
+  // would otherwise pick up when Claude starts the dev server.
+  return new Anthropic({ baseURL: "https://api.anthropic.com", timeout: TIMEOUT_MS, maxRetries: 1 });
 }
 
 export function textOf(content: Anthropic.Beta.BetaContentBlock[]) {
