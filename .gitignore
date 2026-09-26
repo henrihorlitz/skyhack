@@ -48,3 +48,10 @@ docs/pitch-deck.md
 docs/elevator-pitch.md
 docs/*pitch*.pdf
 CLAUDE.md
+
+# Hackathon working material: kept locally, not part of the product
+design Inspo/
+.mcp.json
+.codex/
+docs/judging-criteria.md
+docs/plan.md
