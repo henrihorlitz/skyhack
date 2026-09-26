@@ -1,7 +1,7 @@
 // POST /api/tts  { text }  ->  audio/mpeg
 // ElevenLabs text-to-speech. Key stays server-side; the browser only gets audio.
 // If the key is missing or the call fails, returns 503 and the UI falls back to the
-// browser's built-in speechSynthesis (see components/speak-button.tsx).
+// browser's built-in speechSynthesis (see speak() in lib/client.ts).
 
 const VOICE_ID = process.env.ELEVENLABS_VOICE_ID || "JBFqnCBsd6RMkjVDRZzb"; // "George", a default voice
 const MODEL_ID = process.env.ELEVENLABS_MODEL_ID || "eleven_flash_v2_5"; // low latency

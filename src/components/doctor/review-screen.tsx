@@ -34,10 +34,13 @@ export function ReviewScreen({ patient, initialNote }: Props) {
     }
   }
 
+  // First draft: usually already prefetched by the ward overview, so this is instant.
   useEffect(() => {
-    load(initialNote, false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [patient.id]);
+    fetchDraft(patient.id, initialNote)
+      .then((res) => setDraft(res.update))
+      .catch(() => toast.error("Couldn't prepare the draft. Please try again."))
+      .finally(() => setLoading(false));
+  }, [patient.id, initialNote]);
 
   const approvedToday = state?.approvals.find((a) => a.patientId === patient.id && isToday(a));
   const family = patient.family.map((f) => f.name.split(" ")[0]).join(" and ");

@@ -107,23 +107,20 @@ export async function addQuestion(patientId: string, question: string, askedBy: 
   return q;
 }
 
-// Books the first free slot and attaches it to the patient's latest question without a slot.
-export async function bookCallback(patientId: string): Promise<string | null> {
-  const all = await getQuestions();
-  const taken = new Set(all.map((q) => q.callbackSlot).filter(Boolean));
-  const slot = CALLBACK_SLOTS.find((s) => !taken.has(s)) ?? null;
-  const target = all.find((q) => q.patientId === patientId && !q.callbackSlot);
-  if (!slot) return null;
-  if (!target) return slot;
+export async function nextFreeSlot(): Promise<string | null> {
+  const taken = new Set((await getQuestions()).map((q) => q.callbackSlot).filter(Boolean));
+  return CALLBACK_SLOTS.find((s) => !taken.has(s)) ?? null;
+}
 
+export async function setCallback(questionId: string, slot: string) {
   const db = getSupabase();
   if (!db) {
-    target.callbackSlot = slot;
-    return slot;
+    const q = memory.questions.find((x) => x.id === questionId);
+    if (q) q.callbackSlot = slot;
+    return;
   }
-  const { error } = await db.from("questions").update({ callback_slot: slot }).eq("id", target.id);
+  const { error } = await db.from("questions").update({ callback_slot: slot }).eq("id", questionId);
   if (error) throw error;
-  return slot;
 }
 
 // Clears everything live so the demo starts fresh. Seed approvals stay.

@@ -1,6 +1,6 @@
 import { betaZodTool } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
-import { addQuestion, bookCallback, getApprovals } from "@/lib/store";
+import { addQuestion, getApprovals, nextFreeSlot, setCallback } from "@/lib/store";
 import { DEMO_USER, WARD_INFO, getPatient } from "@/data/seed";
 
 // Tools for the family voice agent. They only ever expose APPROVED information.
@@ -10,6 +10,9 @@ export type AgentEvent = { tool: string; label: string };
 
 export function makeAgentTools(patientId: string, askedBy: string, events: AgentEvent[]) {
   const patient = getPatient(patientId);
+  // The model may call log + book in parallel and in either order, so link them here.
+  let loggedId: string | null = null;
+  let bookedSlot: string | null = null;
 
   const getApprovedUpdate = betaZodTool({
     name: "get_approved_update",
@@ -50,9 +53,13 @@ export function makeAgentTools(patientId: string, askedBy: string, events: Agent
     name: "log_question_for_doctor",
     description:
       "Pass a question you are not allowed to answer to the patient's doctor. Use it for any medical question beyond the approved update. Phrase the question clearly in English.",
-    inputSchema: z.object({ question: z.string().describe("The family member's question, clearly phrased") }),
+    inputSchema: z.object({
+      question: z.string().describe("The question as the family member asked it: short, first person, e.g. 'Does my mother have cancer?'"),
+    }),
     run: async ({ question }) => {
-      await addQuestion(patientId, question, askedBy);
+      const q = await addQuestion(patientId, question, askedBy);
+      loggedId = q.id;
+      if (bookedSlot) await setCallback(q.id, bookedSlot);
       events.push({ tool: "log_question_for_doctor", label: `Question sent to ${DEMO_USER.shortName}` });
       return `Logged for ${DEMO_USER.name}. It will appear on her review screen.`;
     },
@@ -63,7 +70,9 @@ export function makeAgentTools(patientId: string, askedBy: string, events: Agent
     description: "Book a personal callback from the doctor during the phone hour, for the question you just logged.",
     inputSchema: z.object({}),
     run: async () => {
-      const slot = await bookCallback(patientId);
+      const slot = bookedSlot ?? (await nextFreeSlot());
+      bookedSlot = slot;
+      if (slot && loggedId) await setCallback(loggedId, slot);
       events.push({ tool: "book_callback_slot", label: slot ? `Callback booked: ${slot}` : "No callback slot free" });
       return slot ? `Booked: ${DEMO_USER.name} will call on ${slot}.` : "No free slots. Suggest the daily phone hour 12:00–13:00.";
     },
