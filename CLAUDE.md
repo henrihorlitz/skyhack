@@ -10,6 +10,16 @@ Tracks: **Healthcare** and **AI Agents**. Partners on the website: Cursor, Supab
 Have the submission ready **before 17:00**: live Vercel URL, repo link, a short description, and the demo must run without us touching code.
 Team max. 3 people.
 
+## Judging criteria (optimize for these, details in `docs/judging-criteria.md`)
+
+1. **Pitch:** how clearly you communicate the idea and vision.
+2. **Technical Execution:** how well it works and is built.
+3. **Impact:** the potential to solve a real problem.
+4. **Innovation:** how original and creative the approach is.
+5. **User Experience:** how intuitive, useful and delightful it is.
+
+Domain facts from a nurse (note structure, what nurses may say, call volume): `docs/research/nurse-input.md`.
+
 ## The idea: MindPeace (working title)
 
 - **One sentence:** For families of hospitalized patients in Portugal, who can only reach a doctor between 12:00 and 13:00 (and nurses aren't allowed to share details), MindPeace turns the doctor's daily chart note into a doctor-approved, plain-language update and a voice agent that answers family questions 24/7, using only approved information.
