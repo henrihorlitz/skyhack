@@ -12,7 +12,7 @@ export function EventChips({ events }: { events: { tool: string; label: string }
       {shown.map((e, n) => (
         <span
           key={n}
-          className="inline-flex items-center gap-1.5 rounded-full bg-medical-soft px-3 py-1 text-xs font-medium text-medical animate-in fade-in zoom-in-95"
+          className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1.5 text-[13px] font-semibold text-primary-deep animate-in fade-in zoom-in-95"
         >
           {e.tool === "book_callback_slot" ? <CalendarClock className="size-3.5" /> : <ClipboardList className="size-3.5" />}
           {e.label}

@@ -7,7 +7,6 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -47,6 +46,25 @@
   --color-withheld-soft: var(--withheld-soft);
   --color-internal: var(--internal);
   --color-internal-soft: var(--internal-soft);
+  --color-primary-deep: var(--primary-deep);
+  --color-primary-soft: var(--primary-soft);
+  --color-canvas-deep: var(--canvas-deep);
+  --color-subtitle: var(--subtitle);
+  --color-section: var(--section);
+  --color-coral: var(--coral);
+  --color-coral-soft: var(--coral-soft);
+  --color-coral-ink: var(--coral-ink);
+  --color-neutral-soft: var(--neutral-soft);
+  --color-neutral-ink: var(--neutral-ink);
+  --color-day: var(--day);
+  --color-row: var(--row);
+  --radius-card: 28px;
+  --radius-row: 18px;
+  --radius-chip: 14px;
+  --shadow-card: 0 18px 40px rgba(55, 110, 104, 0.16);
+  --shadow-soft: 0 8px 24px rgba(55, 110, 104, 0.1);
+  --shadow-glow: 0 8px 20px rgba(56, 168, 168, 0.35);
+  --font-sans: var(--font-poppins);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -57,48 +75,61 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  /* MindPeace scope colors: green = a nurse may say it, amber = needs doctor approval,
-     rose = withheld from family, slate = internal care-team instruction. */
-  --nursing: oklch(0.55 0.13 155);
-  --nursing-soft: oklch(0.96 0.04 155);
-  --medical: oklch(0.62 0.14 70);
-  --medical-soft: oklch(0.97 0.05 85);
-  --withheld: oklch(0.58 0.17 15);
-  --withheld-soft: oklch(0.97 0.025 15);
-  --internal: oklch(0.5 0.02 260);
-  --internal-soft: oklch(0.96 0.005 260);
+  /* MindPeace design system (see DESIGN.md). Near-white mint canvas, white cards,
+     teal for the one main action and good news, coral only for withheld information. */
+  --background: #f4faf8; /* canvas */
+  --canvas-deep: #e7f3f0;
+  --foreground: #3a3a3a; /* ink */
+  --card: #ffffff;
+  --card-foreground: #3a3a3a;
+  --popover: #ffffff;
+  --popover-foreground: #3a3a3a;
+  --primary: #38a8a8;
+  --primary-deep: #2e9696;
+  --primary-foreground: #ffffff;
+  --primary-soft: #e7f6f5;
+  --secondary: #e7f6f5;
+  --secondary-foreground: #2e9696;
+  --muted: #f6f8f8; /* field */
+  --muted-foreground: #8d8d8d;
+  --accent: #e7f6f5;
+  --accent-foreground: #2e9696;
+  --destructive: #d46550;
+  --border: #e6eeee;
+  --input: #e6eeee;
+  --ring: #38a8a8;
+  --subtitle: #5c7572;
+  --section: #1f5551;
+  --coral: #f88870;
+  --coral-soft: #fff0ec;
+  --coral-ink: #d46550;
+  --neutral-soft: #f3f4f4;
+  --neutral-ink: #6d6d6d;
+  --day: #f4f7f7;
+  --row: #f7fbfb;
+  --chart-1: #38a8a8;
+  --chart-2: #2e9696;
+  --chart-3: #f88870;
+  --chart-4: #8d8d8d;
+  --chart-5: #1f5551;
+  --radius: 1.25rem; /* 20px; cards use rounded-card (28px) */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #3a3a3a;
+  --sidebar-primary: #38a8a8;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e7f6f5;
+  --sidebar-accent-foreground: #2e9696;
+  --sidebar-border: #e6eeee;
+  --sidebar-ring: #38a8a8;
+  /* Scope chips: shareable = teal, needs approval = teal outline, withheld = coral, internal = gray */
+  --nursing: #2e9696;
+  --nursing-soft: #e7f6f5;
+  --medical: #2e9696;
+  --medical-soft: #ffffff;
+  --withheld: #d46550;
+  --withheld-soft: #fff0ec;
+  --internal: #6d6d6d;
+  --internal-soft: #f3f4f4;
 }
 
 .dark {
@@ -140,7 +171,8 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: linear-gradient(160deg, var(--canvas-deep), var(--background) 42%, #f8fcfb) fixed;
   }
   html {
     @apply font-sans;

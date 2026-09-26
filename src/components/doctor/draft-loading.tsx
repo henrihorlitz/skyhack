@@ -19,10 +19,10 @@ export function DraftLoading() {
   }, []);
   return (
     <div className="flex min-h-[420px] flex-col items-center justify-center gap-4 text-center">
-      <Sparkles className="size-6 animate-pulse text-medical" />
-      <ul className="flex flex-col gap-1.5 text-sm">
+      <Sparkles className="size-6 animate-pulse text-primary" />
+      <ul className="flex flex-col gap-2 text-[15px]">
         {STEPS.map((s, i) => (
-          <li key={s} className={i < step ? "text-muted-foreground line-through decoration-muted-foreground/40" : i === step ? "font-medium" : "text-muted-foreground/40"}>
+          <li key={s} className={i < step ? "text-muted-foreground line-through decoration-muted-foreground/40" : i === step ? "font-semibold text-primary-deep" : "text-muted-foreground/50"}>
             {s}
           </li>
         ))}

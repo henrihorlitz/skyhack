@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { ChevronDown, Home } from "lucide-react";
 import { relativeDay } from "@/lib/client";
+import { DEMO_TODAY } from "@/data/seed";
 import type { Approval } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type Props = { approvals: Approval[]; doctor: string; freshDay?: string };
 
-// Past days (tap to expand) → today highlighted → upcoming steps → expected discharge.
+// Past days (tap to expand) → today in teal → upcoming steps → expected discharge (an estimate).
 export function Timeline({ approvals, doctor, freshDay }: Props) {
   const latest = approvals.at(-1);
   if (!latest) return null;
@@ -20,17 +21,24 @@ export function Timeline({ approvals, doctor, freshDay }: Props) {
         <PastNode key={`${a.day}-${a === latest}`} approval={a} current={a === latest} fresh={a.day === freshDay} />
       ))}
       {upcoming.map((i) => (
-        <Node key={i.id} dot={<span className="block size-3 rounded-full border-2 border-dashed border-muted-foreground/50 bg-background" />}>
-          <p className="text-xs font-medium text-muted-foreground">{i.when ?? "Coming up"}</p>
-          <p className="text-sm">{i.text}</p>
+        <Node key={i.id} dot={<span className="block size-3 rounded-full border-2 border-primary/45 bg-card" />}>
+          <p className="text-[13px] font-semibold text-muted-foreground">{i.when ?? "Coming up"}</p>
+          <p className="text-[15px] leading-snug">{i.text}</p>
         </Node>
       ))}
-      <Node last dot={<span className="grid size-7 place-items-center rounded-full bg-primary text-primary-foreground"><Home className="size-3.5" /></span>}>
-        <p className="text-xs font-medium text-muted-foreground">Expected home</p>
+      <Node
+        last
+        dot={
+          <span className="grid size-7 place-items-center rounded-full bg-primary-soft text-primary-deep">
+            <Home className="size-3.5" />
+          </span>
+        }
+      >
+        <p className="text-[13px] font-semibold text-muted-foreground">Expected home · estimate</p>
         {latest.update.discharge ? (
           <p className="font-semibold">{latest.update.discharge}</p>
         ) : (
-          <p className="text-sm text-muted-foreground">Not estimated yet. {doctor} will update you.</p>
+          <p className="text-[15px] font-medium text-subtitle">Not estimated yet. {doctor} will update you.</p>
         )}
       </Node>
     </ol>
@@ -43,21 +51,22 @@ function PastNode({ approval, current, fresh }: { approval: Approval; current: b
   const today = approval.update.items.filter((i) => i.section === "today");
   return (
     <Node
-      dot={<span className={cn("block size-3 rounded-full", current ? "bg-primary ring-4 ring-primary/15" : "bg-muted-foreground/40")} />}
-      className={cn(fresh && "animate-in fade-in slide-in-from-left-4 duration-700")}
+      id={`day-${approval.day}`}
+      dot={<span className={cn("block size-3 rounded-full", current ? "bg-primary ring-4 ring-primary/20" : "bg-muted-foreground/35")} />}
+      className={cn("scroll-mt-6", fresh && "animate-in fade-in slide-in-from-left-4 duration-700")}
     >
       <button onClick={() => setOpen(!open)} className="flex w-full items-start justify-between gap-2 text-left">
         <div>
-          <p className={cn("text-xs font-medium", current ? "text-primary" : "text-muted-foreground")}>
+          <p className={cn("text-[13px] font-semibold", current ? "text-primary-deep" : "text-muted-foreground")}>
             {day === "today" ? "Today" : day === "yesterday" ? "Yesterday" : day}
-            {fresh && <span className="ml-2 rounded-full bg-nursing-soft px-1.5 py-0.5 text-[10px] text-nursing">New</span>}
+            {fresh && <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-[11px] text-primary-foreground">New</span>}
           </p>
-          <p className={cn(current ? "font-semibold" : "text-sm")}>{approval.update.headline}</p>
+          <p className={cn(current ? "font-semibold" : "text-[15px] font-medium text-subtitle")}>{approval.update.headline}</p>
         </div>
         <ChevronDown className={cn("mt-1 size-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
       </button>
       {open && (
-        <ul className={cn("mt-2 flex flex-col gap-1.5 rounded-xl p-3 text-sm leading-relaxed", current ? "bg-card shadow-sm ring-1 ring-border" : "bg-muted/50")}>
+        <ul className="mt-2.5 flex flex-col gap-1.5 rounded-row bg-row p-3.5 text-[15px] leading-relaxed">
           {today.map((i) => (
             <li key={i.id}>{i.text}</li>
           ))}
@@ -67,14 +76,58 @@ function PastNode({ approval, current, fresh }: { approval: Approval; current: b
   );
 }
 
-function Node({ dot, children, last, className }: { dot: React.ReactNode; children: React.ReactNode; last?: boolean; className?: string }) {
+function Node({
+  id,
+  dot,
+  children,
+  last,
+  className,
+}: {
+  id?: string;
+  dot: React.ReactNode;
+  children: React.ReactNode;
+  last?: boolean;
+  className?: string;
+}) {
   return (
-    <li className={cn("relative flex gap-3 pb-5", className)}>
+    <li id={id} className={cn("relative flex gap-3 pb-5", className)}>
       <div className="relative flex w-7 shrink-0 justify-center pt-1">
         {!last && <span className="absolute top-4 bottom-[-4px] w-px bg-border" />}
-        <span className="relative bg-transparent">{dot}</span>
+        <span className="relative">{dot}</span>
       </div>
       <div className="min-w-0 flex-1">{children}</div>
     </li>
+  );
+}
+
+// DESIGN.md day chips: one per day of the stay, today in teal. Tapping a day jumps to it.
+export function DayStrip({ admitted, approvals }: { admitted: string; approvals: Approval[] }) {
+  const start = Date.parse(`${admitted}T12:00:00Z`);
+  const end = Date.parse(`${DEMO_TODAY}T12:00:00Z`) + 3 * 86_400_000;
+  const days: string[] = [];
+  for (let t = start; t <= end; t += 86_400_000) days.push(new Date(t).toISOString().slice(0, 10));
+  const withUpdate = new Set(approvals.map((a) => a.day));
+
+  return (
+    <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
+      {days.map((d) => {
+        const date = new Date(`${d}T12:00:00Z`);
+        const selected = d === DEMO_TODAY;
+        return (
+          <button
+            key={d}
+            onClick={() => document.getElementById(`day-${d}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            className={cn(
+              "flex h-[58px] w-[42px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-chip",
+              selected ? "bg-primary text-primary-foreground shadow-glow" : "bg-day text-muted-foreground",
+            )}
+          >
+            <span className="text-[11px] font-medium">{date.toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" })}</span>
+            <span className={cn("text-[15px] font-semibold", !selected && "text-foreground")}>{date.getUTCDate()}</span>
+            <span className={cn("size-1 rounded-full", withUpdate.has(d) ? (selected ? "bg-primary-foreground" : "bg-primary") : "bg-transparent")} />
+          </button>
+        );
+      })}
+    </div>
   );
 }

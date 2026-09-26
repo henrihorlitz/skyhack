@@ -50,7 +50,7 @@ flowchart LR
 | Health check | `src/app/status/page.tsx` | 🟢/🔴 per service. Note: Anthropic/ElevenLabs rows only check the key *exists*, not that it's valid | ✅ |
 | Doctor view | — | Chart note → briefing (✅ shareable / 🔒 withheld / ✏️ doctor phrases) → approve | ⬜ planned |
 | Family app | — | Status pill + timeline + voice agent | ⬜ planned |
-| UI kit | `src/components/ui/*` | shadcn/ui on Base UI, Tailwind v4 theme tokens in `src/app/globals.css` | ✅ |
+| UI kit | `src/components/ui/*` | shadcn/ui on Base UI, Tailwind v4 theme tokens in `src/app/globals.css`. Visual identity lives in `DESIGN.md`, applied via the tokens in `globals.css` (Poppins, mint canvas, teal, coral for withheld) | ✅ |
 
 ## Reliability design (why the demo can't crash)
 

@@ -44,73 +44,84 @@ export function WardOverview() {
   const questions = real.reduce((n, r) => n + r.questions, 0);
 
   return (
-    <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-8">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <main className="mx-auto w-full max-w-[1120px] flex-1 px-6 pt-6 pb-4">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
         <div>
-          <p className="text-sm text-muted-foreground">Saturday 26 September</p>
-          <h1 className="text-2xl font-semibold tracking-tight">Family updates · {HOSPITAL.ward}</h1>
+          <p className="font-medium text-subtitle">Saturday 26 September</p>
+          <h1 className="text-[40px] leading-tight font-semibold tracking-[-0.03em]">Family updates</h1>
         </div>
-        <div className="flex gap-3 text-sm">
-          <Stat value={HOSPITAL.beds} label="patients" />
-          <Stat value={HOSPITAL.beds - drafts} label="families informed" />
-          <Stat value={drafts} label="drafts to review" highlight={drafts > 0} />
-          <Stat value={questions} label="family questions" highlight={questions > 0} />
+        <div className="flex flex-wrap gap-3">
+          <Stat value={HOSPITAL.beds} label="Patients" />
+          <Stat value={HOSPITAL.beds - drafts} label="Families informed" />
+          <Stat value={drafts} label="Drafts to review" highlight={drafts > 0} />
+          <Stat value={questions} label="Family questions" highlight={questions > 0} />
         </div>
       </div>
 
       {needsAction.length > 0 && (
-        <>
-          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Needs you</h2>
-          <div className="mb-8 overflow-hidden rounded-xl border bg-card shadow-sm">
+        <section className="mb-8">
+          <h2 className="mb-3 text-sm font-semibold text-section">Needs you</h2>
+          <div className="flex flex-col gap-1 rounded-card bg-card p-3 shadow-card">
             {needsAction.map((r) => (
               <PatientRow key={r.bed} row={r} />
             ))}
           </div>
-        </>
+        </section>
       )}
-      <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">All beds</h2>
-      <div className="overflow-hidden rounded-xl border bg-card">
-        {rows.map((r) => (r.kind === "real" ? <PatientRow key={r.bed} row={r} /> : <OtherRow key={r.bed} row={r} />))}
-      </div>
+      <section>
+        <h2 className="mb-3 text-sm font-semibold text-section">All beds</h2>
+        <div className="flex flex-col gap-1 rounded-card bg-card p-3 shadow-card">
+          {rows.map((r) => (r.kind === "real" ? <PatientRow key={r.bed} row={r} /> : <OtherRow key={r.bed} row={r} />))}
+        </div>
+      </section>
     </main>
   );
 }
 
 function Stat({ value, label, highlight }: { value: number; label: string; highlight?: boolean }) {
   return (
-    <div className={cn("rounded-lg border px-3 py-2", highlight && "border-medical/40 bg-medical-soft")}>
-      <div className="text-lg font-semibold leading-none">{value}</div>
-      <div className="mt-1 text-xs text-muted-foreground">{label}</div>
+    <div className={cn("min-w-28 rounded-[20px] bg-card px-4 py-3 shadow-soft", highlight && "bg-primary text-primary-foreground shadow-glow")}>
+      <div className="text-[22px] leading-none font-semibold">{value}</div>
+      <div className={cn("mt-1.5 text-[13px] font-medium", highlight ? "text-primary-foreground/85" : "text-muted-foreground")}>{label}</div>
     </div>
+  );
+}
+
+const initials = (name: string) => name.split(" ").map((n) => n[0]).join("").slice(0, 2);
+
+function Person({ bed, name, age, headline }: { bed: number; name: string; age: number; headline?: string }) {
+  return (
+    <>
+      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-soft text-[13px] font-semibold text-primary-deep">
+        {initials(name)}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="font-semibold">
+          {name} <span className="font-medium text-muted-foreground">· {age} · Bed {bed}</span>
+        </div>
+        {headline && <div className="truncate text-sm font-medium text-subtitle">{headline}</div>}
+      </div>
+    </>
   );
 }
 
 function PatientRow({ row }: { row: Extract<Row, { kind: "real" }> }) {
   return (
-    <Link
-      href={`/doctor/${row.id}`}
-      className="flex items-center gap-4 border-b px-4 py-3 last:border-b-0 hover:bg-muted/60"
-    >
-      <span className="w-10 text-sm text-muted-foreground">{row.bed}</span>
-      <div className="min-w-0 flex-1">
-        <div className="font-medium">
-          {row.name} <span className="font-normal text-muted-foreground">· {row.age}</span>
-        </div>
-        {row.headline && <div className="truncate text-sm text-muted-foreground">{row.headline}</div>}
-      </div>
+    <Link href={`/doctor/${row.id}`} className="flex items-center gap-4 rounded-row px-3 py-3 transition-colors hover:bg-row">
+      <Person bed={row.bed} name={row.name} age={row.age} headline={row.headline} />
       {row.questions > 0 && (
-        <span className="inline-flex items-center gap-1 rounded-full bg-withheld-soft px-2.5 py-1 text-xs font-medium text-withheld">
-          <MessageCircleQuestion className="size-3.5" />
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-[13px] font-semibold text-primary-deep">
+          <MessageCircleQuestion className="size-4" />
           {row.questions} {row.questions === 1 ? "question" : "questions"}
         </span>
       )}
       {row.approvedAt ? (
-        <span className="inline-flex w-36 items-center gap-1 text-sm text-nursing">
+        <span className="inline-flex w-40 items-center gap-1.5 text-sm font-medium text-primary-deep">
           <CircleCheck className="size-4" /> Approved {timeLabel(row.approvedAt)}
         </span>
       ) : (
-        <span className="inline-flex w-36 items-center gap-1 text-sm font-medium text-medical">
-          <FileText className="size-4" /> Draft ready
+        <span className="inline-flex w-40 items-center justify-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-[13px] font-semibold text-primary-foreground">
+          <FileText className="size-4" /> Review draft
         </span>
       )}
       <ChevronRight className="size-4 text-muted-foreground" />
@@ -120,18 +131,12 @@ function PatientRow({ row }: { row: Extract<Row, { kind: "real" }> }) {
 
 function OtherRow({ row }: { row: Extract<Row, { kind: "other" }> }) {
   return (
-    <div className="flex items-center gap-4 border-b px-4 py-3 last:border-b-0">
-      <span className="w-10 text-sm text-muted-foreground">{row.bed}</span>
-      <div className="min-w-0 flex-1">
-        <div className="font-medium">
-          {row.name} <span className="font-normal text-muted-foreground">· {row.age}</span>
-        </div>
-        <div className="truncate text-sm text-muted-foreground">{row.headline}</div>
-      </div>
-      <span className="inline-flex w-36 items-center gap-1 text-sm text-nursing">
+    <div className="flex items-center gap-4 rounded-row px-3 py-3">
+      <Person bed={row.bed} name={row.name} age={row.age} headline={row.headline} />
+      <span className="inline-flex w-40 items-center gap-1.5 text-sm font-medium text-muted-foreground">
         <CircleCheck className="size-4" /> Approved {row.approvedAt}
       </span>
-      <ChevronRight className="size-4 text-muted-foreground/30" />
+      <ChevronRight className="size-4 text-transparent" />
     </div>
   );
 }

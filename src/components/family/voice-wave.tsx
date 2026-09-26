@@ -4,11 +4,11 @@ import { useEffect, useRef } from "react";
 
 // A soft, blurred ribbon that moves with the voice on the call screen (inspired by design Inspo/).
 // getLevel() returns the current audio volume 0..1; the ribbon swells when someone speaks.
-// Colors are placeholders until the design system lands.
+// Teal shades from DESIGN.md.
 const RIBBONS = [
-  { colors: ["#1e3a8a", "#2563eb", "#0ea5e9"], width: 46, speed: 0.9, phase: 0, alpha: 0.9 },
-  { colors: ["#10b981", "#34d399", "#1d4ed8"], width: 30, speed: 1.3, phase: 2.1, alpha: 0.75 },
-  { colors: ["#0d9488", "#60a5fa", "#1e40af"], width: 20, speed: 1.7, phase: 4.2, alpha: 0.6 },
+  { colors: ["#2e9696", "#38a8a8", "#7fd1c9"], width: 46, speed: 0.9, phase: 0, alpha: 0.9 },
+  { colors: ["#7fd1c9", "#38a8a8", "#1f5551"], width: 30, speed: 1.3, phase: 2.1, alpha: 0.7 },
+  { colors: ["#bfe7e2", "#2e9696", "#38a8a8"], width: 20, speed: 1.7, phase: 4.2, alpha: 0.6 },
 ];
 
 export function VoiceWave({ getLevel, className }: { getLevel: () => number; className?: string }) {

@@ -5,6 +5,7 @@ import { ConversationProvider, useConversation } from "@elevenlabs/react";
 import { Mic, MicOff, PhoneOff } from "lucide-react";
 import { EventChips } from "@/components/family/event-chips";
 import { VoiceWave } from "@/components/family/voice-wave";
+import { AppIcon } from "@/components/brand";
 import { DEMO_USER } from "@/data/seed";
 import type { Patient } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -100,15 +101,16 @@ function Call({ patient, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 mx-auto flex w-full max-w-md flex-col bg-background animate-in fade-in slide-in-from-bottom-6">
       <div className="flex flex-col items-center px-6 pt-14 text-center">
-        <p className="text-sm text-muted-foreground">{error ? "Call failed" : connected ? timer : "Calling…"}</p>
-        <p className="mt-1 text-3xl font-semibold tracking-tight">MindPeace</p>
-        <p className="text-sm text-muted-foreground">{patient.firstName}&apos;s care team assistant</p>
+        <p className="text-sm font-medium text-subtitle">{error ? "Call failed" : connected ? timer : "Calling…"}</p>
+        <AppIcon className="mt-4 size-16 rounded-[18px] shadow-glow" />
+        <p className="mt-4 text-[34px] leading-tight font-semibold tracking-[-0.03em]">MindPeace</p>
+        <p className="font-medium text-subtitle">{patient.firstName}&apos;s care team assistant</p>
       </div>
 
       <VoiceWave getLevel={getLevel} className="mt-6 h-44 w-full" />
 
       <div className="flex flex-1 flex-col justify-end gap-2 overflow-hidden px-6 pb-4">
-        {error && <p className="rounded-xl bg-muted p-3 text-sm">{error}. Please use the chat instead.</p>}
+        {error && <p className="rounded-row bg-card p-3.5 text-sm font-medium shadow-soft">{error}. Please use the chat instead.</p>}
         {last.map((l, i) => (
           <p
             key={lines.length - last.length + i}
@@ -126,11 +128,11 @@ function Call({ patient, onClose }: Props) {
         <button
           onClick={() => conversation.setMuted(!conversation.isMuted)}
           aria-label={conversation.isMuted ? "Unmute" : "Mute"}
-          className={cn("grid size-16 place-items-center rounded-full", conversation.isMuted ? "bg-foreground text-background" : "bg-muted")}
+          className={cn("grid size-16 place-items-center rounded-full", conversation.isMuted ? "bg-foreground text-background" : "bg-card text-primary shadow-soft")}
         >
           {conversation.isMuted ? <MicOff className="size-6" /> : <Mic className="size-6" />}
         </button>
-        <button onClick={hangUp} aria-label="End call" className="grid size-16 place-items-center rounded-full bg-red-500 text-white">
+        <button onClick={hangUp} aria-label="End call" className="grid size-16 place-items-center rounded-full bg-coral text-white shadow-[0_8px_20px_rgba(248,136,112,0.4)]">
           <PhoneOff className="size-6" />
         </button>
       </div>

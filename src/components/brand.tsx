@@ -1,13 +1,24 @@
-import { Leaf } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-// Placeholder logo until Henri's design system lands (swap the icon/wordmark here only).
+// The MindPeace mark (leaf with a check: "approved, you can relax") + wordmark. See DESIGN.md.
+export function AppIcon({ className }: { className?: string }) {
+  return (
+    <Image
+      src="/brand/app-icon.png"
+      alt=""
+      width={96}
+      height={96}
+      className={cn("size-8 rounded-[10px]", className)}
+      priority
+    />
+  );
+}
+
 export function Logo({ className }: { className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-1.5 font-semibold tracking-tight", className)}>
-      <span className="grid size-7 place-items-center rounded-lg bg-primary text-primary-foreground">
-        <Leaf className="size-4" />
-      </span>
+    <span className={cn("inline-flex items-center gap-2 font-semibold tracking-tight text-foreground", className)}>
+      <AppIcon />
       MindPeace
     </span>
   );

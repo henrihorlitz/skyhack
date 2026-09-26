@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BatteryFull, Camera, Flashlight, Leaf, Lock, SignalHigh, Wifi } from "lucide-react";
+import { BatteryFull, Camera, Flashlight, Lock, SignalHigh, Wifi } from "lucide-react";
+import { AppIcon } from "@/components/brand";
 import { cn } from "@/lib/utils";
 
 export type PushNotification = { title: string; body: string };
@@ -29,7 +30,11 @@ export function LockScreen({ notification, onOpen }: Props) {
   const time = now?.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Lisbon" }) ?? "";
 
   return (
-    <div className="relative flex min-h-dvh flex-col overflow-hidden text-white select-none">
+    <div
+      className="relative flex min-h-dvh flex-col overflow-hidden text-white select-none"
+      // The lock screen belongs to the phone, not our app: use the OS font (SF on Apple devices).
+      style={{ fontFamily: "-apple-system, BlinkMacSystemFont, system-ui, sans-serif" }}
+    >
       <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_20%_10%,#6d8bff_0%,transparent_55%),radial-gradient(90%_70%_at_90%_40%,#ff8a65_0%,transparent_60%),radial-gradient(120%_90%_at_40%_100%,#3a1c71_0%,#1b1340_70%)]" />
       <div className="absolute -top-20 -right-24 size-80 rounded-full bg-white/10 blur-3xl" />
 
@@ -52,9 +57,7 @@ export function LockScreen({ notification, onOpen }: Props) {
             onClick={onOpen}
             className="flex w-full items-start gap-3 rounded-[22px] bg-white/25 p-3.5 text-left shadow-lg backdrop-blur-2xl animate-in fade-in slide-in-from-top-6 duration-500"
           >
-            <span className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-primary text-primary-foreground">
-              <Leaf className="size-5" />
-            </span>
+            <AppIcon className="size-10 shrink-0" />
             <span className="min-w-0 flex-1">
               <span className="flex justify-between text-[13px]">
                 <span className="font-semibold">MindPeace</span>
